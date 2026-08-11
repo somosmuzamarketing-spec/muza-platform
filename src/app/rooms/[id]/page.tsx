@@ -30,21 +30,29 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
   });
 
   return (
-    <div className="container">
-      <p><Link href="/dashboard">&larr; Volver</Link></p>
-      <div className="card">
-        <h2>{room.name}</h2>
-        <ChatRoom
-          roomId={room.id}
-          currentUser={{ id: userId, name: session.user.name || "" }}
-          initialMessages={messages.map((m) => ({
-            id: m.id,
-            content: m.content,
-            createdAt: m.createdAt.toISOString(),
-            author: m.user.name || m.user.username,
-            userId: m.userId,
-          }))}
-        />
+    <div>
+      <header className="navbar">
+        <Link href="/dashboard" className="logo">
+          <span className="logo-mark">M</span>
+          <span className="logo-word">Muza</span>
+        </Link>
+        <Link href="/dashboard">&larr; Volver</Link>
+      </header>
+      <div className="container">
+        <div className="card">
+          <h2>💬 {room.name}</h2>
+          <ChatRoom
+            roomId={room.id}
+            currentUser={{ id: userId, name: session.user.name || "" }}
+            initialMessages={messages.map((m) => ({
+              id: m.id,
+              content: m.content,
+              createdAt: m.createdAt.toISOString(),
+              author: m.user.name || m.user.username,
+              userId: m.userId,
+            }))}
+          />
+        </div>
       </div>
     </div>
   );
