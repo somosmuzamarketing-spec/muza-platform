@@ -19,8 +19,7 @@ export default async function Dashboard() {
     <div>
       <header className="navbar">
         <Link href="/dashboard" className="logo">
-          <span className="logo-mark">M</span>
-          <span className="logo-word">Muza</span>
+          <img src="/logo-horizontal.png" alt="Muza" className="logo-img" />
         </Link>
         <div className="navlinks">
           {role === "ADMIN" && <Link href="/admin">Administración</Link>}
