@@ -23,11 +23,19 @@ export default async function VideoPage({ params }: { params: { id: string } }) 
   }
 
   return (
-    <div className="container">
-      <p><Link href="/dashboard">&larr; Volver</Link></p>
-      <div className="card">
-        <h2>{room.name}</h2>
-        <VideoRoom roomId={room.id} />
+    <div>
+      <header className="navbar">
+        <Link href="/dashboard" className="logo">
+          <span className="logo-mark">M</span>
+          <span className="logo-word">Muza</span>
+        </Link>
+        <Link href="/dashboard">&larr; Volver</Link>
+      </header>
+      <div className="container">
+        <div className="card">
+          <h2>🎥 {room.name}</h2>
+          <VideoRoom roomId={room.id} />
+        </div>
       </div>
     </div>
   );
