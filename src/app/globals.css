@@ -1,112 +1,264 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
-  --bg: #0f1115;
-  --panel: #171a21;
-  --border: #2a2e37;
-  --text: #eef0f4;
-  --muted: #9aa2b1;
-  --accent: #8b5cf6;
+  --cream: #fbf4ee;
+  --cream-soft: #f3e6da;
+  --panel: #ffffff;
+  --border: #e8d9c9;
+  --plum: #3d1a3e;
+  --plum-deep: #2a1130;
+  --purple: #5c2d5e;
+  --purple-dark: #4a2350;
+  --terracotta: #c4613a;
+  --gold: #d4a847;
+  --text: #2a1f28;
+  --muted: #8a7768;
+  --danger: #c0392b;
+  --radius: 16px;
 }
 
 * { box-sizing: border-box; }
 
+html, body { height: 100%; }
+
 body {
   margin: 0;
-  background: var(--bg);
+  background: var(--cream);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-a { color: var(--accent); }
-
-.container {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem;
+h1, h2, h3 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  color: var(--plum);
+  margin: 0 0 0.5rem;
+  line-height: 1.15;
 }
 
+h1 { font-size: 2.75rem; font-weight: 700; }
+h2 { font-size: 1.9rem; font-weight: 600; }
+h3 { font-size: 1.4rem; font-weight: 600; }
+
+p { line-height: 1.6; }
+
+a { color: var(--terracotta); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.accent { color: var(--terracotta); font-style: italic; }
+
+.container { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+/* Navbar */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 2rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.navbar .navlinks { display: flex; align-items: center; gap: 1.25rem; font-weight: 500; }
+.navbar .navlinks a { color: var(--plum); }
+
+.logo { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; }
+.logo:hover { text-decoration: none; }
+
+.logo-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--purple);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.logo-word { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 1.4rem; color: var(--plum); }
+
+/* Cards */
 .card {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.5rem;
+  border-radius: var(--radius);
+  padding: 1.75rem;
   margin-bottom: 1.5rem;
+  box-shadow: 0 4px 16px rgba(61, 26, 62, 0.05);
 }
 
-input, button, textarea {
+/* Auth pages */
+.auth-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  background: radial-gradient(circle at top left, var(--cream-soft), var(--cream) 60%);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 12px 40px rgba(61, 26, 62, 0.12);
+}
+
+/* Buttons */
+button, .btn {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  cursor: pointer;
+  background: var(--purple);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  text-decoration: none;
+}
+
+button:hover, .btn:hover { opacity: 0.92; transform: translateY(-1px); text-decoration: none; }
+button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+button.secondary, .btn.secondary {
+  background: transparent;
+  color: var(--plum);
+  border: 1.5px solid var(--purple);
+}
+
+button.gold, .btn.gold {
+  background: var(--gold);
+  color: #2a1f28;
+}
+
+/* Inputs */
+input, textarea, select {
   font-family: inherit;
   font-size: 1rem;
-}
-
-input, textarea {
   width: 100%;
-  padding: 0.6rem 0.8rem;
-  background: #10131a;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  background: var(--cream);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
   color: var(--text);
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.9rem;
 }
 
-button {
-  background: var(--accent);
-  color: white;
-  border: none;
-  padding: 0.6rem 1.1rem;
-  border-radius: 8px;
-  cursor: pointer;
-}
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--purple); }
+input::placeholder, textarea::placeholder { color: var(--muted); }
 
-button:hover { opacity: 0.9; }
-
-button.secondary {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text);
-}
-
-.room-list a {
-  display: block;
-  padding: 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  margin-bottom: 0.5rem;
-  text-decoration: none;
-  color: var(--text);
-}
-
-.room-list a:hover { border-color: var(--accent); }
-
+/* Badges */
 .badge {
   display: inline-block;
-  font-size: 0.75rem;
-  padding: 0.15rem 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.65rem;
   border-radius: 999px;
-  background: #2a2e37;
-  color: var(--muted);
+  background: var(--cream-soft);
+  color: var(--purple);
   margin-left: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
+.badge.gold { background: var(--gold); color: #2a1f28; }
+
+.pill-banner {
+  display: inline-block;
+  background: var(--gold);
+  color: #2a1f28;
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+/* Room grid */
+.room-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.room-card {
+  display: block;
+  padding: 1.4rem;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--panel);
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.room-card:hover {
+  border-color: var(--purple);
+  transform: translateY(-2px);
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(61, 26, 62, 0.1);
+}
+
+.room-card .room-icon { font-size: 1.7rem; margin-bottom: 0.6rem; display: block; }
+.room-card .room-name { font-weight: 600; color: var(--plum); }
+
+/* Chat */
 .chat-box {
   height: 55vh;
   overflow-y: auto;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
   padding: 1rem;
   margin-bottom: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.6rem;
+  background: var(--cream);
 }
 
-.msg .author { color: var(--accent); font-weight: 600; margin-right: 0.4rem; }
-.msg .time { color: var(--muted); font-size: 0.75rem; margin-left: 0.4rem; }
-
-nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--border);
+.msg {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.55rem 0.9rem;
+  max-width: 80%;
+  align-self: flex-start;
 }
 
-nav .brand { font-weight: 700; letter-spacing: 0.02em; }
+.msg .author { color: var(--purple); font-weight: 700; margin-right: 0.4rem; }
+.msg .time { color: var(--muted); font-size: 0.72rem; margin-left: 0.5rem; }
+
+/* Table (admin) */
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; padding: 0.6rem; color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+td { padding: 0.6rem; border-top: 1px solid var(--border); }
+
+/* Hero */
+.hero { text-align: center; padding: 4rem 1.5rem 3rem; }
+.hero .eyebrow { text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.8rem; color: var(--muted); font-weight: 600; }
+.hero h1 { font-size: 3.2rem; margin: 0.75rem 0; }
+.hero p.lead { font-size: 1.15rem; color: var(--muted); max-width: 520px; margin: 0 auto 1.5rem; font-style: italic; }
+.hero-actions { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
+
+.footer-note { text-align: center; color: var(--muted); font-size: 0.85rem; margin-top: 3rem; }
+
+@media (max-width: 600px) {
+  .hero h1 { font-size: 2.3rem; }
+  .navbar { padding: 1rem 1.25rem; }
+}
