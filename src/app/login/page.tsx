@@ -32,8 +32,7 @@ export default function LoginPage() {
     <div className="auth-shell">
       <div className="auth-card">
         <Link href="/" className="logo" style={{ marginBottom: "1.5rem" }}>
-          <span className="logo-mark">M</span>
-          <span className="logo-word">Muza</span>
+          <img src="/logo-horizontal.png" alt="Muza" className="logo-img large" />
         </Link>
         <h2>Bienvenida de vuelta</h2>
         <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
