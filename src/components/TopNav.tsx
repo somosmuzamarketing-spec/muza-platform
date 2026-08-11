@@ -1,0 +1,49 @@
+import Link from "next/link";
+
+type TopNavProps = {
+  name: string;
+  avatarUrl?: string | null;
+  role?: string;
+  plan?: string;
+  isMentor?: boolean;
+};
+
+export default function TopNav({ name, avatarUrl, role, plan, isMentor }: TopNavProps) {
+  const initials = (name || "M")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase())
+    .join("");
+
+  return (
+    <header className="navbar">
+      <Link href="/dashboard" className="logo">
+        <span className="logo-mark">M</span>
+        <span className="logo-word">Muza</span>
+      </Link>
+
+      <div className="navlinks">
+        <Link href="/contactos">Contactos</Link>
+        <Link href="/eventos">Eventos</Link>
+        <Link href="/soporte">Soporte</Link>
+        {role === "ADMIN" && <Link href="/admin">Administración</Link>}
+
+        <Link href="/perfil" className="nav-avatar-link" title="Mi perfil">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt={name} className="nav-avatar" />
+          ) : (
+            <span className="nav-avatar nav-avatar-initials">{initials}</span>
+          )}
+          <span className="nav-avatar-name">
+            {name}
+            {plan === "MUZA_PLUS" && <span className="badge gold" style={{ marginLeft: "0.4rem" }}>Muza+</span>}
+            {isMentor && <span className="badge" style={{ marginLeft: "0.4rem" }}>Mentora</span>}
+          </span>
+        </Link>
+
+        <Link href="/api/auth/signout">Salir</Link>
+      </div>
+    </header>
+  );
+}
