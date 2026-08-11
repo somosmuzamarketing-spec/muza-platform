@@ -18,83 +18,91 @@ export default async function AdminPage() {
   ]);
 
   return (
-    <div className="container">
-      <p><Link href="/dashboard">&larr; Volver</Link></p>
-      <h1>Administración</h1>
+    <div>
+      <header className="navbar">
+        <Link href="/dashboard" className="logo">
+          <span className="logo-mark">M</span>
+          <span className="logo-word">Muza</span>
+        </Link>
+        <Link href="/dashboard">&larr; Volver</Link>
+      </header>
+      <div className="container">
+        <h1>Administración</h1>
 
-      {pendingRequests.length > 0 && (
-        <div className="card">
-          <h2>Pagos pendientes de aprobar ({pendingRequests.length})</h2>
-          {pendingRequests.map((r) => (
-            <div key={r.id} style={{ borderTop: "1px solid var(--border)", paddingTop: "0.75rem", marginTop: "0.75rem" }}>
-              <p>{r.fullName} — {r.email}</p>
-              <ApproveRequestButton id={r.id} />
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="card">
-        <h2>Crear miembro manualmente</h2>
-        <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
-          Úsalo cuando confirmes un pago fuera de Stripe (transferencia, efectivo, etc.).
-        </p>
-        <CreateMemberForm />
-      </div>
-
-      <div className="card">
-        <h2>Crear sala</h2>
-        <form action={createRoom}>
-          <input name="name" placeholder="Nombre de la sala" required />
-          <input name="description" placeholder="Descripción (opcional)" />
-          <select name="type" style={{ width: "100%", padding: "0.6rem", marginBottom: "0.75rem", background: "#10131a", color: "var(--text)", border: "1px solid var(--border)", borderRadius: 8 }}>
-            <option value="CHAT">Chat</option>
-            <option value="VIDEO">Video</option>
-          </select>
-          <button type="submit">Crear sala</button>
-        </form>
-      </div>
-
-      <div className="card">
-        <h2>Miembros y acceso a salas</h2>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr>
-              <th style={{ textAlign: "left", padding: "0.5rem" }}>Miembro</th>
-              {rooms.map((room) => (
-                <th key={room.id} style={{ textAlign: "center", padding: "0.5rem", fontSize: "0.8rem" }}>
-                  {room.name}<br /><span className="badge">{room.type}</span>
-                </th>
-              ))}
-              <th>Activo</th>
-            </tr>
-          </thead>
-          <tbody>
-            {members.map((m) => (
-              <tr key={m.id} style={{ borderTop: "1px solid var(--border)" }}>
-                <td style={{ padding: "0.5rem" }}>{m.name || m.username}<br /><span style={{ color: "var(--muted)", fontSize: "0.8rem" }}>{m.username}</span></td>
-                {rooms.map((room) => {
-                  const has = m.memberships.some((mem) => mem.roomId === room.id);
-                  return (
-                    <td key={room.id} style={{ textAlign: "center", padding: "0.5rem" }}>
-                      <form action={toggleMembership}>
-                        <input type="hidden" name="userId" value={m.id} />
-                        <input type="hidden" name="roomId" value={room.id} />
-                        <button type="submit" className={has ? "" : "secondary"}>{has ? "✓" : "+"}</button>
-                      </form>
-                    </td>
-                  );
-                })}
-                <td style={{ textAlign: "center" }}>
-                  <form action={toggleUserActive}>
-                    <input type="hidden" name="userId" value={m.id} />
-                    <button type="submit" className="secondary">{m.isActive ? "Desactivar" : "Activar"}</button>
-                  </form>
-                </td>
-              </tr>
+        {pendingRequests.length > 0 && (
+          <div className="card">
+            <h2>Pagos pendientes de aprobar <span className="badge gold">{pendingRequests.length}</span></h2>
+            {pendingRequests.map((r) => (
+              <div key={r.id} style={{ borderTop: "1px solid var(--border)", paddingTop: "0.75rem", marginTop: "0.75rem" }}>
+                <p>{r.fullName} — {r.email}</p>
+                <ApproveRequestButton id={r.id} />
+              </div>
             ))}
-          </tbody>
-        </table>
+          </div>
+        )}
+
+        <div className="card">
+          <h2>Crear miembro manualmente</h2>
+          <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
+            Úsalo cuando confirmes un pago fuera de Stripe (transferencia, efectivo, etc.).
+          </p>
+          <CreateMemberForm />
+        </div>
+
+        <div className="card">
+          <h2>Crear sala</h2>
+          <form action={createRoom}>
+            <input name="name" placeholder="Nombre de la sala" required />
+            <input name="description" placeholder="Descripción (opcional)" />
+            <select name="type">
+              <option value="CHAT">Chat</option>
+              <option value="VIDEO">Video</option>
+            </select>
+            <button type="submit">Crear sala</button>
+          </form>
+        </div>
+
+        <div className="card">
+          <h2>Miembros y acceso a salas</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Miembro</th>
+                {rooms.map((room) => (
+                  <th key={room.id} style={{ textAlign: "center" }}>
+                    {room.name}<br /><span className="badge">{room.type}</span>
+                  </th>
+                ))}
+                <th>Activo</th>
+              </tr>
+            </thead>
+            <tbody>
+              {members.map((m) => (
+                <tr key={m.id}>
+                  <td>{m.name || m.username}<br /><span style={{ color: "var(--muted)", fontSize: "0.8rem" }}>{m.username}</span></td>
+                  {rooms.map((room) => {
+                    const has = m.memberships.some((mem) => mem.roomId === room.id);
+                    return (
+                      <td key={room.id} style={{ textAlign: "center" }}>
+                        <form action={toggleMembership}>
+                          <input type="hidden" name="userId" value={m.id} />
+                          <input type="hidden" name="roomId" value={room.id} />
+                          <button type="submit" className={has ? "" : "secondary"}>{has ? "✓" : "+"}</button>
+                        </form>
+                      </td>
+                    );
+                  })}
+                  <td style={{ textAlign: "center" }}>
+                    <form action={toggleUserActive}>
+                      <input type="hidden" name="userId" value={m.id} />
+                      <button type="submit" className="secondary">{m.isActive ? "Desactivar" : "Activar"}</button>
+                    </form>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
