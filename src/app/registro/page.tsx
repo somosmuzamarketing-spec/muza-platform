@@ -30,8 +30,7 @@ export default function RegistroPage() {
     <div className="auth-shell">
       <div className="auth-card">
         <Link href="/" className="logo" style={{ marginBottom: "1.5rem" }}>
-          <span className="logo-mark">M</span>
-          <span className="logo-word">Muza</span>
+          <img src="/logo-horizontal.png" alt="Muza" className="logo-img large" />
         </Link>
         <span className="pill-banner">Cupos limitados</span>
         <h2 style={{ marginTop: "0.75rem" }}>Únete a Muza</h2>
