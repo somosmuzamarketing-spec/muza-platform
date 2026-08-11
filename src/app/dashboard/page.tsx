@@ -7,6 +7,7 @@ export default async function Dashboard() {
   const session = await getServerSession(authOptions);
   const userId = (session?.user as any)?.id;
   const role = (session?.user as any)?.role;
+  const name = session?.user?.name || "";
 
   const rooms = role === "ADMIN"
     ? await prisma.room.findMany({ where: { isActive: true } })
@@ -15,21 +16,30 @@ export default async function Dashboard() {
       });
 
   return (
-    <div className="container">
-      <nav style={{ marginLeft: "-1.5rem", marginRight: "-1.5rem", marginTop: "-2rem" }}>
-        <span className="brand">Muza</span>
-        <span>
-          {role === "ADMIN" && <Link href="/admin" style={{ marginRight: "1rem" }}>Administración</Link>}
+    <div>
+      <header className="navbar">
+        <Link href="/dashboard" className="logo">
+          <span className="logo-mark">M</span>
+          <span className="logo-word">Muza</span>
+        </Link>
+        <div className="navlinks">
+          {role === "ADMIN" && <Link href="/admin">Administración</Link>}
           <Link href="/api/auth/signout">Cerrar sesión</Link>
-        </span>
-      </nav>
-      <div className="card" style={{ marginTop: "1.5rem" }}>
-        <h2>Tus salas</h2>
+        </div>
+      </header>
+      <div className="container">
+        <h2>Hola{name ? `, ${name}` : ""} 👋</h2>
+        <p style={{ color: "var(--muted)", marginTop: "-0.5rem" }}>Estas son tus salas disponibles.</p>
         {rooms.length === 0 && <p style={{ color: "var(--muted)" }}>Todavía no tienes salas asignadas.</p>}
-        <div className="room-list">
+        <div className="room-grid">
           {rooms.map((room) => (
-            <Link key={room.id} href={room.type === "CHAT" ? `/rooms/${room.id}` : `/video/${room.id}`}>
-              {room.name}
+            <Link
+              key={room.id}
+              href={room.type === "CHAT" ? `/rooms/${room.id}` : `/video/${room.id}`}
+              className="room-card"
+            >
+              <span className="room-icon">{room.type === "CHAT" ? "💬" : "🎥"}</span>
+              <span className="room-name">{room.name}</span>
               <span className="badge">{room.type === "CHAT" ? "Chat" : "Video"}</span>
             </Link>
           ))}
