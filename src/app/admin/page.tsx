@@ -21,8 +21,7 @@ export default async function AdminPage() {
     <div>
       <header className="navbar">
         <Link href="/dashboard" className="logo">
-          <span className="logo-mark">M</span>
-          <span className="logo-word">Muza</span>
+          <img src="/logo-horizontal.png" alt="Muza" className="logo-img" />
         </Link>
         <Link href="/dashboard">&larr; Volver</Link>
       </header>
