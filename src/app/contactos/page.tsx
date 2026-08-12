@@ -28,7 +28,7 @@ function RoleBadges({ role, isMentor }: { role?: string | null; isMentor?: boole
   return (
     <>
       {role === "FOUNDER" && <span className="badge gold">Fundadora</span>}
-      {role === "COFOUNDER" && <span className="badge cofounder">Cofundadora</span>}
+      {role === "COFOUNDER" && <span className="badge cofounder">Fundadora</span>}
       {role !== "FOUNDER" && role !== "COFOUNDER" && role !== "ADMIN" && (
         <span className="badge member">Miembro</span>
       )}
