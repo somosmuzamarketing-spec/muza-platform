@@ -3,7 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import ChatRoom from "@/components/ChatRoom";
-import Link from "next/link";
+import TopNav from "@/components/TopNav";
 
 export default async function RoomPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -12,7 +12,10 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
   const userId = (session.user as any).id as string;
   const role = (session.user as any).role as string;
 
-  const room = await prisma.room.findUnique({ where: { id: params.id } });
+  const [room, me] = await Promise.all([
+    prisma.room.findUnique({ where: { id: params.id } }),
+    prisma.user.findUnique({ where: { id: userId } }),
+  ]);
   if (!room || room.type !== "CHAT") notFound();
 
   if (role !== "ADMIN") {
@@ -31,12 +34,7 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
 
   return (
     <div>
-      <header className="navbar">
-        <Link href="/dashboard" className="logo">
-          <img src="/logo-horizontal.png" alt="Muza" className="logo-img" />
-        </Link>
-        <Link href="/dashboard">&larr; Volver</Link>
-      </header>
+      <TopNav name={me?.name || ""} avatarUrl={me?.avatarUrl} role={role} plan={me?.plan} isMentor={me?.isMentor} />
       <div className="container">
         <div className="card">
           <h2>💬 {room.name}</h2>
