@@ -10,6 +10,12 @@ datasource db {
 // role: "ADMIN" | "MEMBER"
 // type (Room): "CHAT" | "VIDEO"
 // status (PaymentRequest): "PENDING" | "PAID" | "APPROVED" | "REJECTED"
+// plan (User): "MIEMBRO" | "MUZA_PLUS"
+// status (Contact): "PENDIENTE" | "ACEPTADO"
+// type (Event): "EVENTO" | "TALLER" | "WEBINAR" | "NETWORKING"
+// status (SupportTicket): "ABIERTO" | "RESUELTO"
+// type (Nomination): "MENTORA" | "WEBINAR"
+// status (Nomination): "PENDIENTE" | "APROBADA" | "RECHAZADA"
 
 model User {
   id           String       @id @default(cuid())
@@ -17,11 +23,25 @@ model User {
   passwordHash String
   name         String?
   email        String?      @unique
+
+  // --- Identidad de perfil ---
+  avatarUrl    String?      @db.Text // dataURL (base64) de la foto de perfil
+  bio          String?      @db.Text
+  title        String?      // ej. "Fundadora de Estudio Luna", "Coach de negocios"
+  plan         String       @default("MIEMBRO") // MIEMBRO | MUZA_PLUS
+  isMentor     Boolean      @default(false)
+
   role         String       @default("MEMBER")
   isActive     Boolean      @default(true)
   createdAt    DateTime     @default(now())
-  memberships  Membership[]
-  messages     Message[]
+
+  memberships       Membership[]
+  messages          Message[]
+  reservations      EventReservation[]
+  supportTickets    SupportTicket[]
+  nominations       Nomination[]
+  contactsSent      Contact[]          @relation("ContactRequester")
+  contactsReceived  Contact[]          @relation("ContactReceiver")
 }
 
 model Room {
@@ -33,6 +53,7 @@ model Room {
   createdAt   DateTime     @default(now())
   memberships Membership[]
   messages    Message[]
+  events      Event[]
 }
 
 model Membership {
@@ -57,13 +78,82 @@ model Message {
 }
 
 model PaymentRequest {
-  id                String    @id @default(cuid())
-  fullName          String
-  email             String
-  stripeSessionId   String?   @unique
-  stripeCustomerId  String?
-  status            String    @default("PENDING")
-  createdAt         DateTime  @default(now())
-  approvedAt        DateTime?
-  generatedUsername String?
+  id                  String    @id @default(cuid())
+  fullName            String
+  email               String
+  stripeSessionId     String?   @unique
+  stripeCustomerId    String?
+  status              String    @default("PENDING")
+  createdAt           DateTime  @default(now())
+  approvedAt          DateTime?
+  generatedUsername   String?
+  referredByUsername  String?   // usuario que la invitó (programa de referidos)
+}
+
+// --- Directorio de contactos entre miembros ---
+model Contact {
+  id          String   @id @default(cuid())
+  requesterId String
+  contactId   String
+  status      String   @default("PENDIENTE") // PENDIENTE | ACEPTADO
+  createdAt   DateTime @default(now())
+
+  requester User @relation("ContactRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  contact   User @relation("ContactReceiver", fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, contactId])
+}
+
+// --- Eventos y reservas de cupo ---
+model Event {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  type         String   @default("EVENTO") // EVENTO | TALLER | WEBINAR | NETWORKING
+  startsAt     DateTime
+  isOnline     Boolean  @default(true)
+  location     String?  // dirección si es presencial
+  roomId       String?  // sala de video vinculada (opcional)
+  capacity     Int?     // null = sin límite de cupo
+  createdAt    DateTime @default(now())
+
+  room         Room?              @relation(fields: [roomId], references: [id])
+  reservations EventReservation[]
+}
+
+model EventReservation {
+  id        String   @id @default(cuid())
+  eventId   String
+  userId    String
+  createdAt DateTime @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+}
+
+// --- Contacto con soporte Muza ---
+model SupportTicket {
+  id        String   @id @default(cuid())
+  userId    String
+  subject   String
+  message   String
+  status    String   @default("ABIERTO") // ABIERTO | RESUELTO
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// --- Nominaciones: mentora Muza / participante de webinars ---
+model Nomination {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // MENTORA | WEBINAR
+  topic     String?  // área de expertise (mentora) o tema propuesto (webinar)
+  message   String
+  status    String   @default("PENDIENTE") // PENDIENTE | APROBADA | RECHAZADA
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
