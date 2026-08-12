@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
-  const { fullName, email } = await req.json();
+  const { fullName, email, referredBy } = await req.json();
   if (!fullName || !email) {
     return NextResponse.json({ error: "Nombre y email son obligatorios." }, { status: 400 });
   }
@@ -18,7 +18,12 @@ export async function POST(req: Request) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
   const paymentRequest = await prisma.paymentRequest.create({
-    data: { fullName, email, status: "PENDING" },
+    data: {
+      fullName,
+      email,
+      status: "PENDING",
+      referredByUsername: typeof referredBy === "string" && referredBy.trim() ? referredBy.trim() : undefined,
+    },
   });
 
   const checkoutSession = await stripe.checkout.sessions.create({
