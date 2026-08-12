@@ -278,6 +278,18 @@ input::placeholder, textarea::placeholder { color: var(--muted); }
 .profile-badges .badge { margin-left: 0; }
 .profile-bio { margin-top: 0.9rem; line-height: 1.6; color: var(--text); }
 
+.dashboard-hero { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+.dashboard-hero-avatar { width: 72px; height: 72px; border-radius: 50%; overflow: hidden; flex-shrink: 0; background: var(--cream-soft); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 1.4rem; color: var(--plum); }
+.dashboard-hero-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.profile-bio-section { border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 1rem; }
+.profile-bio-section:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+.profile-bio-label { font-size: 0.8rem; font-weight: 600; color: var(--plum); margin: 0 0 0.25rem; }
+.profile-bio-text { font-size: 0.95rem; line-height: 1.6; margin: 0; color: var(--text); }
+.profile-bio-highlight { background: var(--plum); border-radius: 10px; padding: 1rem 1.1rem; margin-top: 1.25rem; }
+.profile-bio-highlight .profile-bio-label { color: var(--gold); }
+.profile-bio-highlight .profile-bio-text { color: var(--cream); }
+
 /* Avatar upload (Mi perfil) */
 .avatar-upload { display: inline-block; }
 
