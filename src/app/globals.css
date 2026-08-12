@@ -241,6 +241,113 @@ input::placeholder, textarea::placeholder { color: var(--muted); }
   .quicklinks-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* Profile header (cover + overlapping avatar) */
+.profile-header {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 16px rgba(61, 26, 62, 0.05);
+}
+
+.profile-cover {
+  height: 72px;
+  background: linear-gradient(120deg, var(--plum), var(--purple));
+}
+
+.profile-body {
+  padding: 0 1.75rem 1.5rem;
+  margin-top: -34px;
+}
+
+.profile-info-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.profile-name { margin: 0; }
+.profile-title { color: var(--muted); margin: 0.15rem 0 0; font-size: 0.9rem; }
+.profile-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.profile-badges .badge { margin-left: 0; }
+.profile-bio { margin-top: 0.9rem; line-height: 1.6; color: var(--text); }
+
+/* Avatar upload (Mi perfil) */
+.avatar-upload { display: inline-block; }
+
+.avatar-upload-preview {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  background: var(--cream-soft);
+  overflow: hidden;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1.4rem;
+  color: var(--plum);
+}
+
+.avatar-upload-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.avatar-upload-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(42, 17, 48, 0.6);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 0.3rem;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.avatar-upload-preview:hover .avatar-upload-overlay { opacity: 1; }
+
+/* Navbar avatar */
+.nav-avatar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.nav-avatar-link:hover { text-decoration: none; }
+
+.nav-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.nav-avatar-initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cream-soft);
+  color: var(--plum);
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.nav-avatar-name { font-size: 0.85rem; font-weight: 500; color: var(--plum); }
+
 /* Chat */
 .chat-box {
   height: 55vh;
