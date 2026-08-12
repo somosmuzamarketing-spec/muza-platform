@@ -5,9 +5,23 @@ import { redirect } from "next/navigation";
 import TopNav from "@/components/TopNav";
 import { requestContact, respondContact, removeContact } from "./actions";
 
-function Avatar({ url, name }: { url?: string | null; name: string }) {
-  if (url) return <img src={url} alt={name} className="mini-avatar" />;
-  return <span className="mini-avatar mini-avatar-initials">{(name || "M").charAt(0).toUpperCase()}</span>;
+function Avatar({
+  url,
+  name,
+  className = "mini-avatar",
+  initialsClassName = "mini-avatar-initials",
+}: {
+  url?: string | null;
+  name: string;
+  className?: string;
+  initialsClassName?: string;
+}) {
+  if (url) return <img src={url} alt={name} className={className} />;
+  return (
+    <span className={`${className} ${initialsClassName}`}>
+      {(name || "M").charAt(0).toUpperCase()}
+    </span>
+  );
 }
 
 export default async function ContactosPage() {
@@ -82,45 +96,59 @@ export default async function ContactosPage() {
         <div className="card">
           <h2>Mis contactos <span className="badge">{accepted.length}</span></h2>
           {accepted.length === 0 && <p style={{ color: "var(--muted)" }}>Todavía no tienes contactos. Explora el directorio abajo.</p>}
-          {accepted.map((c) => {
-            const other = c.requesterId === userId ? c.contact : c.requester;
-            return (
-              <div key={c.id} className="contact-row">
-                <Avatar url={other.avatarUrl} name={other.name || other.username} />
-                <div className="contact-row-info">
-                  <strong>{other.name || other.username}</strong>
-                  {other.title && <div style={{ color: "var(--muted)", fontSize: "0.85rem" }}>{other.title}</div>}
+          <div className="contact-cards-grid">
+            {accepted.map((c) => {
+              const other = c.requesterId === userId ? c.contact : c.requester;
+              return (
+                <div key={c.id} className="contact-card">
+                  <div className="contact-card-cover" />
+                  <div className="contact-card-body">
+                    <Avatar
+                      url={other.avatarUrl}
+                      name={other.name || other.username}
+                      className="contact-card-avatar"
+                      initialsClassName="contact-card-avatar-initials"
+                    />
+                    <div className="contact-card-name">{other.name || other.username}</div>
+                    {other.title && <div className="contact-card-title">{other.title}</div>}
+                    <form action={removeContact}>
+                      <input type="hidden" name="contactRequestId" value={c.id} />
+                      <button type="submit" className="secondary" style={{ width: "100%" }}>Quitar</button>
+                    </form>
+                  </div>
                 </div>
-                <form action={removeContact}>
-                  <input type="hidden" name="contactRequestId" value={c.id} />
-                  <button type="submit" className="secondary">Quitar</button>
-                </form>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
         <div className="card">
           <h2>Directorio de la comunidad</h2>
-          <div className="room-grid">
+          <div className="contact-cards-grid">
             {directory.map((u) => (
-              <div key={u.id} className="room-card" style={{ textAlign: "left" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.7rem", marginBottom: "0.6rem" }}>
-                  <Avatar url={u.avatarUrl} name={u.name || u.username} />
-                  <div>
-                    <div className="room-name">{u.name || u.username}</div>
-                    {u.title && <div style={{ color: "var(--muted)", fontSize: "0.8rem" }}>{u.title}</div>}
+              <div key={u.id} className="contact-card">
+                <div className="contact-card-cover" />
+                <div className="contact-card-body">
+                  <Avatar
+                    url={u.avatarUrl}
+                    name={u.name || u.username}
+                    className="contact-card-avatar"
+                    initialsClassName="contact-card-avatar-initials"
+                  />
+                  <div className="contact-card-name">
+                    {u.name || u.username}
+                    {u.isMentor && <span className="badge">Mentora</span>}
                   </div>
+                  {u.title && <div className="contact-card-title">{u.title}</div>}
+                  {pendingIds.has(u.id) ? (
+                    <span className="badge gold" style={{ display: "block" }}>Solicitud enviada</span>
+                  ) : (
+                    <form action={requestContact}>
+                      <input type="hidden" name="contactId" value={u.id} />
+                      <button type="submit" style={{ width: "100%" }}>Conectar</button>
+                    </form>
+                  )}
                 </div>
-                {u.isMentor && <span className="badge" style={{ marginBottom: "0.6rem" }}>Mentora</span>}
-                {pendingIds.has(u.id) ? (
-                  <span className="badge gold">Solicitud enviada</span>
-                ) : (
-                  <form action={requestContact}>
-                    <input type="hidden" name="contactId" value={u.id} />
-                    <button type="submit" style={{ width: "100%" }}>Conectar</button>
-                  </form>
-                )}
               </div>
             ))}
           </div>
