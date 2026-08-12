@@ -162,6 +162,8 @@ input::placeholder, textarea::placeholder { color: var(--muted); }
 }
 
 .badge.gold { background: var(--gold); color: #2a1f28; }
+.badge.cofounder { background: var(--purple); color: #fff; }
+.badge.member { background: var(--terracotta); color: #fff; }
 
 .pill-banner {
   display: inline-block;
