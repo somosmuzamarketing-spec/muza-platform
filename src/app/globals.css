@@ -348,6 +348,94 @@ input::placeholder, textarea::placeholder { color: var(--muted); }
 
 .nav-avatar-name { font-size: 0.85rem; font-weight: 500; color: var(--plum); }
 
+/* Contact rows (solicitudes) */
+.contact-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--cream-soft);
+  flex-wrap: wrap;
+}
+
+.contact-row:last-child { border-bottom: none; }
+.contact-row-info { flex: 1; min-width: 140px; }
+
+.mini-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mini-avatar-initials {
+  background: var(--cream-soft);
+  color: var(--plum);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* Contact cards (mis contactos + directorio) */
+.contact-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.contact-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  text-align: center;
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.contact-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(61, 26, 62, 0.1);
+}
+
+.contact-card-cover {
+  height: 30px;
+  background: linear-gradient(120deg, var(--plum), var(--purple));
+}
+
+.contact-card-body {
+  padding: 0 0.75rem 0.9rem;
+  margin-top: -22px;
+}
+
+.contact-card-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  display: block;
+  margin: 0 auto 0.4rem;
+  background: var(--cream-soft);
+}
+
+.contact-card-avatar-initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--plum);
+}
+
+.contact-card-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+.contact-card-name .badge { font-size: 0.6rem; padding: 0.12rem 0.45rem; }
+.contact-card-title { font-size: 0.72rem; color: var(--muted); margin: 0.15rem 0 0.6rem; }
+
 /* Chat */
 .chat-box {
   height: 55vh;
