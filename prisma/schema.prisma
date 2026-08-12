@@ -14,7 +14,7 @@ datasource db {
 // status (Contact): "PENDIENTE" | "ACEPTADO"
 // type (Event): "EVENTO" | "TALLER" | "WEBINAR" | "NETWORKING"
 // status (SupportTicket): "ABIERTO" | "RESUELTO"
-// type (Nomination): "MENTORA" | "WEBINAR"
+// type (Nomination): "MENTORA" | "WEBINAR" | "CHAT" | "ARTICULO"
 // status (Nomination): "PENDIENTE" | "APROBADA" | "RECHAZADA"
 
 model User {
