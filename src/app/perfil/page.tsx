@@ -25,15 +25,21 @@ export default async function PerfilPage() {
           Así te ven las demás muzas en el directorio de contactos.
         </p>
 
-        <div className="card" style={{ display: "flex", gap: "1.5rem", alignItems: "center", flexWrap: "wrap" }}>
-          <AvatarUpload currentAvatarUrl={user.avatarUrl} name={user.name || user.username} action={updateAvatar} />
-          <div>
-            <h3 style={{ margin: 0 }}>{user.name || user.username}</h3>
-            <p style={{ color: "var(--muted)", margin: "0.2rem 0" }}>
-              {user.plan === "MUZA_PLUS" && <span className="badge gold">Muza+</span>}{" "}
-              {user.isMentor && <span className="badge">Mentora Muza</span>}
-              {user.plan !== "MUZA_PLUS" && !user.isMentor && "Miembro Muza"}
-            </p>
+        <div className="profile-header">
+          <div className="profile-cover" />
+          <div className="profile-body">
+            <AvatarUpload currentAvatarUrl={user.avatarUrl} name={user.name || user.username} action={updateAvatar} />
+            <div className="profile-info-row">
+              <div>
+                <h2 className="profile-name">{user.name || user.username}</h2>
+                <p className="profile-title">{user.title || "Miembro Muza"}</p>
+              </div>
+              <div className="profile-badges">
+                {user.plan === "MUZA_PLUS" && <span className="badge gold">Muza+</span>}
+                {user.isMentor && <span className="badge">Mentora</span>}
+              </div>
+            </div>
+            {user.bio && <p className="profile-bio">{user.bio}</p>}
           </div>
         </div>
 
