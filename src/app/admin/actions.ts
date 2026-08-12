@@ -21,7 +21,7 @@ function slugifyUsername(name: string) {
   const base = name
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\p{Diacritic}/gu, "")
     .replace(/[^a-z0-9]+/g, ".")
     .replace(/^\.|\.$/g, "");
   const suffix = Math.floor(100 + Math.random() * 900);
@@ -122,5 +122,86 @@ export async function toggleUserActive(formData: FormData) {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) return;
   await prisma.user.update({ where: { id: userId }, data: { isActive: !user.isActive } });
+  revalidatePath("/admin");
+}
+
+// --- Plan de membresía (upsell) ---
+export async function togglePlan(formData: FormData) {
+  await requireAdmin();
+  const userId = String(formData.get("userId"));
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) return;
+  await prisma.user.update({
+    where: { id: userId },
+    data: { plan: user.plan === "MUZA_PLUS" ? "MIEMBRO" : "MUZA_PLUS" },
+  });
+  revalidatePath("/admin");
+}
+
+// --- Eventos ---
+export async function createEvent(formData: FormData) {
+  await requireAdmin();
+  const title = String(formData.get("title") || "").trim();
+  const description = String(formData.get("description") || "").trim() || undefined;
+  const type = String(formData.get("type") || "EVENTO");
+  const startsAtRaw = String(formData.get("startsAt") || "");
+  const isOnline = formData.get("isOnline") === "on";
+  const location = String(formData.get("location") || "").trim() || undefined;
+  const roomId = String(formData.get("roomId") || "").trim() || undefined;
+  const capacityRaw = String(formData.get("capacity") || "").trim();
+
+  if (!title || !startsAtRaw) throw new Error("Título y fecha son obligatorios.");
+
+  await prisma.event.create({
+    data: {
+      title,
+      description,
+      type,
+      startsAt: new Date(startsAtRaw),
+      isOnline,
+      location,
+      roomId,
+      capacity: capacityRaw ? parseInt(capacityRaw, 10) : undefined,
+    },
+  });
+  revalidatePath("/admin");
+  revalidatePath("/eventos");
+  revalidatePath("/dashboard");
+}
+
+export async function deleteEvent(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("id"));
+  await prisma.event.delete({ where: { id } });
+  revalidatePath("/admin");
+  revalidatePath("/eventos");
+}
+
+// --- Nominaciones (mentoras / webinars) ---
+export async function resolveNomination(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("id"));
+  const approve = String(formData.get("approve")) === "true";
+
+  const nomination = await prisma.nomination.findUnique({ where: { id } });
+  if (!nomination) return;
+
+  await prisma.nomination.update({
+    where: { id },
+    data: { status: approve ? "APROBADA" : "RECHAZADA" },
+  });
+
+  if (approve && nomination.type === "MENTORA") {
+    await prisma.user.update({ where: { id: nomination.userId }, data: { isMentor: true } });
+  }
+
+  revalidatePath("/admin");
+}
+
+// --- Tickets de soporte ---
+export async function resolveTicket(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("id"));
+  await prisma.supportTicket.update({ where: { id }, data: { status: "RESUELTO" } });
   revalidatePath("/admin");
 }
