@@ -2,33 +2,100 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import TopNav from "@/components/TopNav";
+import QuickLinks from "@/components/QuickLinks";
+import ReferralBox from "@/components/ReferralBox";
 
 export default async function Dashboard() {
   const session = await getServerSession(authOptions);
   const userId = (session?.user as any)?.id;
   const role = (session?.user as any)?.role;
-  const name = session?.user?.name || "";
+  const sessionName = session?.user?.name || "";
 
-  const rooms = role === "ADMIN"
-    ? await prisma.room.findMany({ where: { isActive: true } })
-    : await prisma.room.findMany({
-        where: { isActive: true, memberships: { some: { userId } } },
-      });
+  const [user, rooms, nextEvent] = await Promise.all([
+    prisma.user.findUnique({ where: { id: userId } }),
+    role === "ADMIN"
+      ? prisma.room.findMany({ where: { isActive: true } })
+      : prisma.room.findMany({
+          where: { isActive: true, memberships: { some: { userId } } },
+        }),
+    prisma.event.findFirst({
+      where: { startsAt: { gte: new Date() } },
+      orderBy: { startsAt: "asc" },
+      include: { reservations: true },
+    }),
+  ]);
+
+  const name = user?.name || sessionName;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
+  const referralLink = user?.username && baseUrl ? `${baseUrl}/registro?ref=${user.username}` : "";
+
+  const spotsLeft =
+    nextEvent && nextEvent.capacity != null ? Math.max(nextEvent.capacity - nextEvent.reservations.length, 0) : null;
+  const alreadyReserved = nextEvent?.reservations.some((r) => r.userId === userId);
 
   return (
     <div>
-      <header className="navbar">
-        <Link href="/dashboard" className="logo">
-          <img src="/logo-horizontal.png" alt="Muza" className="logo-img" />
-        </Link>
-        <div className="navlinks">
-          {role === "ADMIN" && <Link href="/admin">Administración</Link>}
-          <Link href="/api/auth/signout">Cerrar sesión</Link>
-        </div>
-      </header>
+      <TopNav name={name} avatarUrl={user?.avatarUrl} role={role} plan={user?.plan} isMentor={user?.isMentor} />
       <div className="container">
-        <h2>Hola{name ? `, ${name}` : ""} 👋</h2>
-        <p style={{ color: "var(--muted)", marginTop: "-0.5rem" }}>Estas son tus salas disponibles.</p>
+        <div className="dashboard-hero">
+          <div className="dashboard-hero-avatar">
+            {user?.avatarUrl ? (
+              <img src={user.avatarUrl} alt={name} />
+            ) : (
+              <span>{(name || "M").trim().charAt(0).toUpperCase()}</span>
+            )}
+          </div>
+          <div>
+            <h2 style={{ marginBottom: "0.15rem" }}>Hola{name ? `, ${name}` : ""} 👋</h2>
+            <p style={{ color: "var(--muted)", margin: 0 }}>
+              {user?.title || "Bienvenida a tu espacio Muza."}
+              {user?.plan === "MUZA_PLUS" && <span className="badge gold" style={{ marginLeft: "0.5rem" }}>Muza+</span>}
+              {user?.isMentor && <span className="badge" style={{ marginLeft: "0.5rem" }}>Mentora</span>}
+            </p>
+          </div>
+        </div>
+
+        <QuickLinks isMentor={user?.isMentor} />
+
+        {nextEvent && (
+          <div className="card event-teaser">
+            <span className="pill-banner">Próximo evento</span>
+            <h3 style={{ marginTop: "0.6rem" }}>{nextEvent.title}</h3>
+            <p style={{ color: "var(--muted)", marginTop: "-0.4rem" }}>
+              {new Date(nextEvent.startsAt).toLocaleString("es", {
+                dateStyle: "full",
+                timeStyle: "short",
+              })}
+              {spotsLeft !== null && <> · {spotsLeft > 0 ? `${spotsLeft} cupos disponibles` : "Cupo lleno"}</>}
+            </p>
+            <Link href="/eventos" className="btn">
+              {alreadyReserved ? "Ver mi reserva" : "Reservar mi lugar"}
+            </Link>
+          </div>
+        )}
+
+        {user?.plan !== "MUZA_PLUS" && (
+          <div className="card upsell-card">
+            <span className="pill-banner">Muza+</span>
+            <h3 style={{ marginTop: "0.6rem" }}>Lleva tu experiencia al siguiente nivel</h3>
+            <p style={{ color: "var(--muted)" }}>
+              Con Muza+ accedes a salas exclusivas, mentorías 1:1 y prioridad en cupos de eventos.
+            </p>
+            <Link href="/soporte" className="btn gold">Quiero saber más</Link>
+          </div>
+        )}
+
+        {referralLink && (
+          <div className="card">
+            <h3>Invita a una amiga</h3>
+            <p style={{ color: "var(--muted)" }}>Comparte tu enlace personal y ayúdanos a hacer crecer la comunidad.</p>
+            <ReferralBox link={referralLink} />
+          </div>
+        )}
+
+        <h3 style={{ marginTop: "2rem" }}>Tus salas</h3>
+        <p style={{ color: "var(--muted)", marginTop: "-0.5rem" }}>Chats y videollamadas disponibles para ti.</p>
         {rooms.length === 0 && <p style={{ color: "var(--muted)" }}>Todavía no tienes salas asignadas.</p>}
         <div className="room-grid">
           {rooms.map((room) => (
