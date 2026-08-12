@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function RegistroPage() {
@@ -7,6 +7,12 @@ export default function RegistroPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [referredBy, setReferredBy] = useState<string | null>(null);
+
+  useEffect(() => {
+    const ref = new URLSearchParams(window.location.search).get("ref");
+    if (ref) setReferredBy(ref);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -15,7 +21,7 @@ export default function RegistroPage() {
     const res = await fetch("/api/stripe/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fullName, email }),
+      body: JSON.stringify({ fullName, email, referredBy }),
     });
     const data = await res.json();
     if (!res.ok) {
@@ -30,13 +36,19 @@ export default function RegistroPage() {
     <div className="auth-shell">
       <div className="auth-card">
         <Link href="/" className="logo" style={{ marginBottom: "1.5rem" }}>
-          <img src="/logo-horizontal.png" alt="Muza" className="logo-img large" />
+          <span className="logo-mark">M</span>
+          <span className="logo-word">Muza</span>
         </Link>
         <span className="pill-banner">Cupos limitados</span>
         <h2 style={{ marginTop: "0.75rem" }}>Únete a Muza</h2>
         <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
           Completa el pago y en breve te enviaremos tu usuario y clave de acceso por email.
         </p>
+        {referredBy && (
+          <p style={{ color: "var(--purple)", fontSize: "0.85rem", fontWeight: 600 }}>
+            ✨ Te invitó {referredBy}
+          </p>
+        )}
         <form onSubmit={handleSubmit}>
           <input placeholder="Nombre completo" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
           <input placeholder="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
