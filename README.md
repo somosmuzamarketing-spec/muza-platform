@@ -4,6 +4,8 @@ Plataforma a medida para los miembros de Muza: salas de chat en tiempo real y
 salas de videollamada (estilo Zoom), con acceso por usuario y clave que **tú**
 generas al confirmar el pago. No hay auto-registro abierto: la gente paga,
 tú (o el flujo automático de Stripe) apruebas, y el sistema genera las
+
+<!-- redeploy trigger -->
 credenciales.
 
 ## Stack
