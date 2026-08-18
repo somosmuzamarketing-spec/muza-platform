@@ -21,6 +21,7 @@ function nominationTypeLabel(type: string) {
   if (type === "WEBINAR") return "Webinar";
   if (type === "CHAT") return "Chat";
   if (type === "ARTICULO") return "Artículo";
+  if (type === "MUZA") return "Nominación de Muza";
   return type;
 }
 
@@ -89,11 +90,25 @@ export default async function AdminPage() {
             <h2>Nominaciones pendientes <span className="badge gold">{pendingNominations.length}</span></h2>
             {pendingNominations.map((n) => (
               <div key={n.id} style={{ borderTop: "1px solid var(--border)", paddingTop: "0.75rem", marginTop: "0.75rem" }}>
-                <p style={{ marginBottom: "0.2rem" }}>
-                  <span className="badge">{nominationTypeLabel(n.type)}</span>{" "}
-                  <strong>{n.user.name || n.user.username}</strong> — {n.topic}
-                </p>
-                <p style={{ color: "var(--muted)", whiteSpace: "pre-wrap" }}>{n.message}</p>
+                {n.type === "MUZA" ? (
+                  <>
+                    <p style={{ marginBottom: "0.2rem" }}>
+                      <span className="badge">{nominationTypeLabel(n.type)}</span>{" "}
+                      <strong>{n.nomineeName}</strong>
+                    </p>
+                    <p style={{ color: "var(--muted)" }}>
+                      {n.nomineeEmail} · {n.nomineePhone}
+                      <br />
+                      Nominada por {n.user.name || n.user.username}
+                    </p>
+                  </>
+                ) : (
+                  <p style={{ marginBottom: "0.2rem" }}>
+                    <span className="badge">{nominationTypeLabel(n.type)}</span>{" "}
+                    <strong>{n.user.name || n.user.username}</strong> — {n.topic}
+                  </p>
+                )}
+                {n.message && <p style={{ color: "var(--muted)", whiteSpace: "pre-wrap" }}>{n.message}</p>}
                 <div style={{ display: "flex", gap: "0.5rem" }}>
                   <form action={resolveNomination}>
                     <input type="hidden" name="id" value={n.id} />
@@ -145,7 +160,12 @@ export default async function AdminPage() {
               <option value="TALLER">Taller</option>
               <option value="WEBINAR">Webinar</option>
               <option value="NETWORKING">Networking</option>
+              <option value="CONVERSATORIO">Conversatorio semanal</option>
             </select>
+            <p style={{ color: "var(--muted)", fontSize: "0.85rem", marginTop: "-0.6rem" }}>
+              Para el conversatorio semanal, usa el título como el tema propuesto por la Muza y vincula la sala de video
+              para que el botón de acceso funcione desde el dashboard.
+            </p>
             <input name="startsAt" type="datetime-local" required />
             <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.9rem" }}>
               <input name="isOnline" type="checkbox" defaultChecked style={{ width: "auto", marginBottom: 0 }} />
