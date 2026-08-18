@@ -12,9 +12,9 @@ datasource db {
 // status (PaymentRequest): "PENDING" | "PAID" | "APPROVED" | "REJECTED"
 // plan (User): "MIEMBRO" | "MUZA_PLUS"
 // status (Contact): "PENDIENTE" | "ACEPTADO"
-// type (Event): "EVENTO" | "TALLER" | "WEBINAR" | "NETWORKING"
+// type (Event): "EVENTO" | "TALLER" | "WEBINAR" | "NETWORKING" | "CONVERSATORIO"
 // status (SupportTicket): "ABIERTO" | "RESUELTO"
-// type (Nomination): "MENTORA" | "WEBINAR" | "CHAT" | "ARTICULO"
+// type (Nomination): "MENTORA" | "WEBINAR" | "CHAT" | "ARTICULO" | "MUZA"
 // status (Nomination): "PENDIENTE" | "APROBADA" | "RECHAZADA"
 
 model User {
@@ -109,7 +109,7 @@ model Event {
   id           String   @id @default(cuid())
   title        String
   description  String?
-  type         String   @default("EVENTO") // EVENTO | TALLER | WEBINAR | NETWORKING
+  type         String   @default("EVENTO") // EVENTO | TALLER | WEBINAR | NETWORKING | CONVERSATORIO
   startsAt     DateTime
   isOnline     Boolean  @default(true)
   location     String?  // dirección si es presencial
@@ -145,13 +145,19 @@ model SupportTicket {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// --- Nominaciones: mentora Muza / participante de webinars ---
+// --- Nominaciones: mentora Muza / participante de webinars / nominar a una Muza ---
 model Nomination {
   id        String   @id @default(cuid())
   userId    String
-  type      String   // MENTORA | WEBINAR
+  type      String   // MENTORA | WEBINAR | CHAT | ARTICULO | MUZA
   topic     String?  // área de expertise (mentora) o tema propuesto (webinar)
   message   String
+
+  // --- Datos de la persona nominada (type MUZA: la miembro nomina a otra mujer) ---
+  nomineeName  String? // nombre de la mujer nominada
+  nomineeEmail String? // email de la mujer nominada
+  nomineePhone String? // teléfono de la mujer nominada
+
   status    String   @default("PENDIENTE") // PENDIENTE | APROBADA | RECHAZADA
   createdAt DateTime @default(now())
 
