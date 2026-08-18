@@ -10,6 +10,7 @@ const TYPE_ICON: Record<string, string> = {
   TALLER: "🎨",
   WEBINAR: "🎤",
   NETWORKING: "🥂",
+  CONVERSATORIO: "💬",
 };
 
 export default async function EventosPage() {
