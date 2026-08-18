@@ -5,6 +5,7 @@ import Link from "next/link";
 import TopNav from "@/components/TopNav";
 import QuickLinks from "@/components/QuickLinks";
 import ReferralBox from "@/components/ReferralBox";
+import { joinConversatorio } from "@/app/eventos/actions";
 
 export default async function Dashboard() {
   const session = await getServerSession(authOptions);
@@ -12,7 +13,7 @@ export default async function Dashboard() {
   const role = (session?.user as any)?.role;
   const sessionName = session?.user?.name || "";
 
-  const [user, rooms, nextEvent] = await Promise.all([
+  const [user, rooms, nextEvent, nextConversatorio] = await Promise.all([
     prisma.user.findUnique({ where: { id: userId } }),
     role === "ADMIN"
       ? prisma.room.findMany({ where: { isActive: true } })
@@ -21,6 +22,11 @@ export default async function Dashboard() {
         }),
     prisma.event.findFirst({
       where: { startsAt: { gte: new Date() } },
+      orderBy: { startsAt: "asc" },
+      include: { reservations: true },
+    }),
+    prisma.event.findFirst({
+      where: { type: "CONVERSATORIO", startsAt: { gte: new Date(Date.now() - 1000 * 60 * 60 * 6) } },
       orderBy: { startsAt: "asc" },
       include: { reservations: true },
     }),
@@ -57,6 +63,29 @@ export default async function Dashboard() {
         </div>
 
         <QuickLinks isMentor={user?.isMentor} />
+
+        {nextConversatorio && (
+          <div className="card event-teaser">
+            <span className="pill-banner">Conversatorio semanal</span>
+            <h3 style={{ marginTop: "0.6rem" }}>{nextConversatorio.title}</h3>
+            <p style={{ color: "var(--muted)", marginTop: "-0.4rem" }}>
+              {new Date(nextConversatorio.startsAt).toLocaleString("es", {
+                dateStyle: "full",
+                timeStyle: "short",
+              })}
+            </p>
+            {nextConversatorio.roomId ? (
+              <form action={joinConversatorio}>
+                <input type="hidden" name="eventId" value={nextConversatorio.id} />
+                <button type="submit" style={{ width: "100%" }}>
+                  Entrar al conversatorio
+                </button>
+              </form>
+            ) : (
+              <p style={{ color: "var(--muted)" }}>La sala se habilitará pronto.</p>
+            )}
+          </div>
+        )}
 
         {nextEvent && (
           <div className="card event-teaser">
