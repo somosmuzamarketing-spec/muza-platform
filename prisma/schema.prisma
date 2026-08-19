@@ -115,6 +115,7 @@ model Event {
   location     String?  // dirección si es presencial
   roomId       String?  // sala de video vinculada (opcional)
   externalLink String?  // link externo de info/acceso (Zoom, Meet, WhatsApp, etc.)
+  bannerUrl    String?  // imagen de banner del evento (dataURL base64)
   capacity     Int?     // null = sin límite de cupo
   createdAt    DateTime @default(now())
 
