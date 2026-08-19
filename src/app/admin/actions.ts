@@ -203,6 +203,30 @@ export async function updateEventLink(formData: FormData) {
   revalidatePath("/dashboard");
 }
 
+// Sube/actualiza la imagen de banner de un evento (dataURL generado en el
+// cliente por EventBannerUpload.tsx). Un bannerUrl vacío borra el banner.
+export async function updateEventBanner(formData: FormData): Promise<{ error?: string } | void> {
+  try {
+    await requireAdmin();
+    const id = String(formData.get("id"));
+    const bannerUrl = String(formData.get("bannerUrl") || "");
+
+    if (bannerUrl && !bannerUrl.startsWith("data:image/")) {
+      return { error: "Formato de imagen no válido." };
+    }
+    if (bannerUrl.length > 3_000_000) {
+      return { error: "La imagen sigue siendo muy pesada, prueba con otra." };
+    }
+
+    await prisma.event.update({ where: { id }, data: { bannerUrl: bannerUrl || null } });
+    revalidatePath("/admin");
+    revalidatePath("/eventos");
+    revalidatePath("/dashboard");
+  } catch (e: any) {
+    return { error: e.message || "No se pudo guardar el banner." };
+  }
+}
+
 export async function deleteEvent(formData: FormData) {
   await requireAdmin();
   const id = String(formData.get("id"));
