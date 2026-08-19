@@ -74,14 +74,28 @@ export default async function Dashboard() {
                 timeStyle: "short",
               })}
             </p>
-            {nextConversatorio.roomId ? (
-              <form action={joinConversatorio}>
-                <input type="hidden" name="eventId" value={nextConversatorio.id} />
-                <button type="submit" style={{ width: "100%" }}>
-                  Entrar al conversatorio
-                </button>
-              </form>
-            ) : (
+            <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
+              {nextConversatorio.roomId && (
+                <form action={joinConversatorio} style={{ flex: "1 1 auto" }}>
+                  <input type="hidden" name="eventId" value={nextConversatorio.id} />
+                  <button type="submit" style={{ width: "100%" }}>
+                    Entrar al conversatorio
+                  </button>
+                </form>
+              )}
+              {nextConversatorio.externalLink && (
+                <a
+                  href={nextConversatorio.externalLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn"
+                  style={{ flex: "1 1 auto", textAlign: "center" }}
+                >
+                  Información y acceso
+                </a>
+              )}
+            </div>
+            {!nextConversatorio.roomId && !nextConversatorio.externalLink && (
               <p style={{ color: "var(--muted)" }}>La sala se habilitará pronto.</p>
             )}
           </div>
