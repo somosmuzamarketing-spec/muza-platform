@@ -167,6 +167,7 @@ export async function createEvent(formData: FormData) {
   const isOnline = formData.get("isOnline") === "on";
   const location = String(formData.get("location") || "").trim() || undefined;
   const roomId = String(formData.get("roomId") || "").trim() || undefined;
+  const externalLink = String(formData.get("externalLink") || "").trim() || undefined;
   const capacityRaw = String(formData.get("capacity") || "").trim();
 
   if (!title || !startsAtRaw) throw new Error("Título y fecha son obligatorios.");
@@ -180,9 +181,23 @@ export async function createEvent(formData: FormData) {
       isOnline,
       location,
       roomId,
+      externalLink,
       capacity: capacityRaw ? parseInt(capacityRaw, 10) : undefined,
     },
   });
+  revalidatePath("/admin");
+  revalidatePath("/eventos");
+  revalidatePath("/dashboard");
+}
+
+// Permite editar solo el link externo de un evento ya creado (ej. agregar el
+// link de Zoom/Meet/WhatsApp del conversatorio semanal sin recrear el evento).
+export async function updateEventLink(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("id"));
+  const externalLink = String(formData.get("externalLink") || "").trim() || null;
+
+  await prisma.event.update({ where: { id }, data: { externalLink } });
   revalidatePath("/admin");
   revalidatePath("/eventos");
   revalidatePath("/dashboard");
