@@ -10,6 +10,7 @@ import {
   togglePlan,
   createEvent,
   deleteEvent,
+  updateEventLink,
   resolveNomination,
   resolveTicket,
 } from "./actions";
@@ -163,8 +164,9 @@ export default async function AdminPage() {
               <option value="CONVERSATORIO">Conversatorio semanal</option>
             </select>
             <p style={{ color: "var(--muted)", fontSize: "0.85rem", marginTop: "-0.6rem" }}>
-              Para el conversatorio semanal, usa el título como el tema propuesto por la Muza y vincula la sala de video
-              para que el botón de acceso funcione desde el dashboard.
+              Para el conversatorio semanal, usa el título como el tema propuesto por la Muza. Vincula la sala de video
+              para el acceso interno y/o agrega un link externo (Zoom, Meet, WhatsApp, etc.) para el botón de
+              información y acceso del dashboard.
             </p>
             <input name="startsAt" type="datetime-local" required />
             <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.9rem" }}>
@@ -177,6 +179,7 @@ export default async function AdminPage() {
                 <option key={r.id} value={r.id}>{r.name}</option>
               ))}
             </select>
+            <input name="externalLink" placeholder="Link externo (opcional): Zoom, Meet, WhatsApp..." />
             <input name="location" placeholder="Ubicación (si es presencial)" />
             <input name="capacity" type="number" min={1} placeholder="Cupo máximo (opcional)" />
             <button type="submit">Crear evento</button>
@@ -189,6 +192,7 @@ export default async function AdminPage() {
                   <th>Evento</th>
                   <th>Fecha</th>
                   <th>Reservas</th>
+                  <th>Link externo</th>
                   <th></th>
                 </tr>
               </thead>
@@ -198,6 +202,18 @@ export default async function AdminPage() {
                     <td>{e.title}<br /><span className="badge">{e.type}</span></td>
                     <td>{new Date(e.startsAt).toLocaleString("es")}</td>
                     <td>{e.reservations.length}{e.capacity != null ? ` / ${e.capacity}` : ""}</td>
+                    <td>
+                      <form action={updateEventLink} style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
+                        <input type="hidden" name="id" value={e.id} />
+                        <input
+                          name="externalLink"
+                          defaultValue={e.externalLink || ""}
+                          placeholder="https://..."
+                          style={{ marginBottom: 0, minWidth: "160px" }}
+                        />
+                        <button type="submit" className="secondary">Guardar</button>
+                      </form>
+                    </td>
                     <td>
                       <form action={deleteEvent}>
                         <input type="hidden" name="id" value={e.id} />
