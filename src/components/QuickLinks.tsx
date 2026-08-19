@@ -32,4 +32,3 @@ export default function QuickLinks({ isMentor }: Props) {
         </div>
       );
 }
-</div>
