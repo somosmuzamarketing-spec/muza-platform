@@ -104,7 +104,7 @@ export default async function Dashboard() {
           </div>
         )}
 
-        {nextEvent && (
+        {nextEvent && nextEvent.id !== nextConversatorio?.id && (
           <div className="card event-teaser">
             {nextEvent.bannerUrl && (
               <img src={nextEvent.bannerUrl} alt={nextEvent.title} className="event-banner" />
