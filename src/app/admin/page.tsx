@@ -11,11 +11,13 @@ import {
   createEvent,
   deleteEvent,
   updateEventLink,
+  updateEventBanner,
   resolveNomination,
   resolveTicket,
 } from "./actions";
 import CreateMemberForm from "@/components/CreateMemberForm";
 import ApproveRequestButton from "@/components/ApproveRequestButton";
+import EventBannerUpload from "@/components/EventBannerUpload";
 
 function nominationTypeLabel(type: string) {
   if (type === "MENTORA") return "Mentora";
@@ -192,6 +194,7 @@ export default async function AdminPage() {
                   <th>Evento</th>
                   <th>Fecha</th>
                   <th>Reservas</th>
+                  <th>Banner</th>
                   <th>Link externo</th>
                   <th></th>
                 </tr>
@@ -202,6 +205,9 @@ export default async function AdminPage() {
                     <td>{e.title}<br /><span className="badge">{e.type}</span></td>
                     <td>{new Date(e.startsAt).toLocaleString("es")}</td>
                     <td>{e.reservations.length}{e.capacity != null ? ` / ${e.capacity}` : ""}</td>
+                    <td>
+                      <EventBannerUpload eventId={e.id} currentBannerUrl={e.bannerUrl} action={updateEventBanner} />
+                    </td>
                     <td>
                       <form action={updateEventLink} style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
                         <input type="hidden" name="id" value={e.id} />
