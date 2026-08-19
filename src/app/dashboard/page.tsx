@@ -66,6 +66,9 @@ export default async function Dashboard() {
 
         {nextConversatorio && (
           <div className="card event-teaser">
+            {nextConversatorio.bannerUrl && (
+              <img src={nextConversatorio.bannerUrl} alt={nextConversatorio.title} className="event-banner" />
+            )}
             <span className="pill-banner">Conversatorio semanal</span>
             <h3 style={{ marginTop: "0.6rem" }}>{nextConversatorio.title}</h3>
             <p style={{ color: "var(--muted)", marginTop: "-0.4rem" }}>
@@ -103,6 +106,9 @@ export default async function Dashboard() {
 
         {nextEvent && (
           <div className="card event-teaser">
+            {nextEvent.bannerUrl && (
+              <img src={nextEvent.bannerUrl} alt={nextEvent.title} className="event-banner" />
+            )}
             <span className="pill-banner">Próximo evento</span>
             <h3 style={{ marginTop: "0.6rem" }}>{nextEvent.title}</h3>
             <p style={{ color: "var(--muted)", marginTop: "-0.4rem" }}>
