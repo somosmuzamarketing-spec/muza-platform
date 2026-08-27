@@ -18,6 +18,9 @@ export default function QuickLinks({ isMentor }: Props) {
       { href: "/crear-chat", img: "/quicklinks/Crear_un_chat.jpg", label: "Crear un chat", desc: "Propón un tema para la comunidad" },
       { href: "/chats", img: "/quicklinks/Chats_abiertos.jpg", label: "Chats abiertos", desc: "Únete a un chat" },
       { href: "/escribir-articulo", img: "/quicklinks/Escribe_un_articulo.jpg", label: "Escribir un artículo", desc: "Comparte para el blog" },
+      { href: "/celebremos", img: null, label: "Celebremos", desc: "Comparte un logro" },
+      { href: "/colaboracion", img: null, label: "Busco colaboradora", desc: "Encuentra una aliada" },
+      { href: "/oportunidades", img: null, label: "Bolsa de oportunidades", desc: "Publica o encuentra una" },
         ];
 
   return (
