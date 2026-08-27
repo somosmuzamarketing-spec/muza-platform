@@ -37,9 +37,9 @@ export default function LoginPage() {
         <circle cx="200" cy="200" r="200" stroke="#D8B46A" strokeWidth="1" opacity="0.22" />
       </svg>
       <div className="auth-card">
-        <Link href="/" className="logo" style={{ marginBottom: "1.5rem" }}>
+        <a href="https://somosmuza.com" className="logo" style={{ marginBottom: "1.5rem" }}>
           <img src="/logo-horizontal.png" alt="Muza" className="logo-img large" />
-        </Link>
+        </a>
         <span className="eyebrow">Acceso a Muzas</span>
         <h2>Bienvenida de vuelta</h2>
         <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
