@@ -25,9 +25,9 @@ export default async function VideoPage({ params }: { params: { id: string } }) 
   return (
     <div>
       <header className="navbar">
-        <Link href="/dashboard" className="logo">
+        <a href="https://somosmuza.com" className="logo">
           <img src="/logo-horizontal.png" alt="Muza" className="logo-img" />
-        </Link>
+        </a>
         <Link href="/dashboard">&larr; Volver</Link>
       </header>
       <div className="container">
