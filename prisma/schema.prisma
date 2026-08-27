@@ -16,6 +16,9 @@ datasource db {
 // status (SupportTicket): "ABIERTO" | "RESUELTO"
 // type (Nomination): "MENTORA" | "WEBINAR" | "CHAT" | "ARTICULO" | "MUZA"
 // status (Nomination): "PENDIENTE" | "APROBADA" | "RECHAZADA"
+// type (Shoutout): "LOGRO" | "CUMPLEANOS"
+// kind (BoardPost): "COLABORACION" | "OPORTUNIDAD"
+// status (BoardPost): "ABIERTA" | "CERRADA"
 
 model User {
   id           String       @id @default(cuid())
@@ -30,6 +33,7 @@ model User {
   title        String?      // ej. "Fundadora de Estudio Luna", "Coach de negocios"
   plan         String       @default("MIEMBRO") // MIEMBRO | MUZA_PLUS
   isMentor     Boolean      @default(false)
+  birthDate    DateTime?    // opcional, para el feed de cumpleaños en Celebremos
 
   role         String       @default("MEMBER")
   isActive     Boolean      @default(true)
@@ -42,6 +46,12 @@ model User {
   nominations       Nomination[]
   contactsSent      Contact[]          @relation("ContactRequester")
   contactsReceived  Contact[]          @relation("ContactReceiver")
+
+  spotlights        Spotlight[]
+  challengeEntries  ChallengeEntry[]
+  pollVotes         PollVote[]
+  shoutouts         Shoutout[]
+  boardPosts        BoardPost[]
 }
 
 model Room {
@@ -162,6 +172,104 @@ model Nomination {
 
   status    String   @default("PENDIENTE") // PENDIENTE | APROBADA | RECHAZADA
   createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// --- Muza del mes ---
+model Spotlight {
+  id        String   @id @default(cuid())
+  userId    String
+  quote     String   @db.Text
+  roleLabel String?  // ej. "Fundadora de Estudio Luna"
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// --- Reto del mes ---
+model Challenge {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  entries ChallengeEntry[]
+}
+
+model ChallengeEntry {
+  id          String   @id @default(cuid())
+  challengeId String
+  userId      String
+  content     String   @db.Text
+  createdAt   DateTime @default(now())
+
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([challengeId, userId])
+}
+
+// --- Encuesta de la semana ---
+model Poll {
+  id        String   @id @default(cuid())
+  question  String
+  isActive  Boolean  @default(true)
+  closesAt  DateTime?
+  createdAt DateTime @default(now())
+
+  options PollOption[]
+  votes   PollVote[]
+}
+
+model PollOption {
+  id     String @id @default(cuid())
+  pollId String
+  label  String
+  order  Int    @default(0)
+
+  poll  Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  votes PollVote[]
+}
+
+model PollVote {
+  id        String   @id @default(cuid())
+  pollId    String
+  optionId  String
+  userId    String
+  createdAt DateTime @default(now())
+
+  poll   Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  option PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pollId, userId])
+}
+
+// --- Celebremos: logros y menciones de la comunidad ---
+model Shoutout {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   @default("LOGRO") // LOGRO | CUMPLEANOS
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// --- Busco colaboradora / Bolsa de oportunidades ---
+model BoardPost {
+  id          String   @id @default(cuid())
+  userId      String
+  kind        String   // COLABORACION | OPORTUNIDAD
+  title       String
+  description String   @db.Text
+  category    String?
+  link        String?
+  status      String   @default("ABIERTA") // ABIERTA | CERRADA
+  createdAt   DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
