@@ -638,3 +638,111 @@ td { padding: 0.6rem; border-top: 1px solid var(--border); }
   .hero h1 { font-size: 2.3rem; }
   .navbar { padding: 1rem 1.25rem; }
 }
+
+/* --- Esta semana en Muza (Spotlight / Challenge / Poll) --- */
+.pulse-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+@media (max-width: 800px) {
+  .pulse-grid { grid-template-columns: 1fr; }
+}
+.pulse-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: 0 4px 16px rgba(21, 12, 20, 0.06);
+  display: flex;
+  flex-direction: column;
+}
+.pulse-card h4 {
+  margin: 0 0 0.5rem;
+  font-family: 'Gloock', Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+  color: var(--plum);
+  font-size: 1.1rem;
+}
+
+.spotlight-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--plum), var(--purple));
+  color: var(--gold);
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 0.6rem;
+}
+.spotlight-quote { font-style: italic; color: var(--text); margin: 0 0 0.5rem; }
+.spotlight-name { font-weight: 600; color: var(--plum); font-size: 0.85rem; margin: 0; }
+.spotlight-role { color: var(--muted); font-size: 0.75rem; margin: 0; }
+
+.challenge-meter {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--cream-soft);
+  overflow: hidden;
+  margin: 0.7rem 0;
+}
+.challenge-meter-fill { height: 100%; background: var(--terracotta); border-radius: 999px; }
+.challenge-count { color: var(--muted); font-size: 0.78rem; margin: 0 0 0.7rem; }
+
+.poll-opt { margin-bottom: 0.6rem; }
+.poll-opt-label { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.25rem; }
+.poll-opt-bar { height: 8px; border-radius: 999px; background: var(--cream-soft); overflow: hidden; }
+.poll-opt-bar-fill { height: 100%; background: var(--purple); border-radius: 999px; }
+.poll-vote-btn {
+  width: 100%;
+  text-align: left;
+  background: var(--cream);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 0.55rem 0.8rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.poll-vote-btn:hover { border-color: var(--purple); opacity: 1; transform: none; }
+.poll-voted-note { color: var(--muted); font-size: 0.75rem; margin-top: 0.4rem; }
+
+/* --- Celebremos: feed horizontal --- */
+.feed-scroll { display: flex; gap: 0.9rem; overflow-x: auto; padding-bottom: 0.5rem; margin-top: 1rem; }
+.feed-item {
+  flex: 0 0 220px;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem;
+}
+.feed-item.birthday { background: linear-gradient(135deg, var(--gold), var(--terracotta)); border-color: transparent; }
+.feed-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cream-soft);
+  color: var(--plum);
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+.feed-item.birthday .feed-avatar { background: rgba(255,255,255,0.55); }
+.feed-name { font-weight: 600; color: var(--plum); font-size: 0.85rem; margin: 0; }
+.feed-message { color: var(--text); font-size: 0.85rem; margin: 0.2rem 0 0; }
+
+.badge-new { background: var(--terracotta); color: #fff; }
+
+/* --- Board posts: Colaboración / Oportunidades --- */
+.board-post { border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 1rem; }
+.board-post:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+.board-post-title { margin: 0 0 0.2rem; }
+.board-post-meta { color: var(--muted); font-size: 0.78rem; margin: 0 0 0.5rem; }
