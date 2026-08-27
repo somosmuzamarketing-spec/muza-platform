@@ -14,6 +14,7 @@
   --terracotta-ink: #915A43; /* NUEVO — variante AA-safe de terracota para texto/links sobre fondo claro */
   --gold: #D8B46A;           /* antes #d4a847 */
   --gold-dim: #8C7440;       /* NUEVO — variante oscura del dorado, para acentos sobre fondo claro */
+  --muted-on-dark: #C9B6C4;  /* NUEVO — texto secundario sobre fondos vino oscuros */
   --text: #150C14;           /* antes #2a1f28 — ahora --ink */
   --muted: #7A6656;          /* antes #8a7768 — ahora --muted-on-paper */
   --danger: #c0392b;
@@ -296,18 +297,18 @@ input::placeholder, textarea::placeholder { color: var(--muted); }
 .quicklinks-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.75rem;
+  gap: 1.1rem;
   margin: 1.5rem 0;
 }
 
 .quicklink-card {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 1rem 0.85rem;
-  border: 1.5px solid var(--border);
-  border-radius: 14px;
+  align-items: flex-start;
+  gap: 1rem;
+  text-align: left;
+  padding: 1.3rem 1.35rem;
+  border: 1px solid rgba(21, 12, 20, 0.08);
+  border-radius: 4px;
   text-decoration: none;
   color: var(--text);
   background: var(--panel);
@@ -318,39 +319,56 @@ input::placeholder, textarea::placeholder { color: var(--muted); }
   border-color: var(--gold);
   transform: translateY(-2px);
   text-decoration: none;
-  box-shadow: 0 8px 20px rgba(21, 12, 20, 0.1);
+  box-shadow: 0 10px 24px -14px rgba(21, 12, 20, 0.35);
 }
+
+.quicklink-card.featured {
+  background: linear-gradient(155deg, var(--plum) 0%, var(--plum-deep) 100%);
+  border-color: var(--plum);
+}
+.quicklink-card.featured:hover { border-color: var(--gold); }
+.quicklink-card.featured .quicklink-chip { background: rgba(216, 180, 106, 0.16); }
+.quicklink-card.featured .quicklink-chip svg { stroke: var(--gold); }
+.quicklink-card.featured .quicklink-label { color: var(--cream); }
+.quicklink-card.featured .quicklink-desc { color: var(--muted-on-dark); }
 
 .quicklink-photo {
-    width: 52px;
-    height: 52px;
+    width: 44px;
+    height: 44px;
     object-fit: cover;
     object-position: top center;
-    border-radius: 10px;
-    border: 2px solid var(--gold);
-    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    flex-shrink: 0;
     display: block;
 }
-.quicklink-label { font-weight: 600; color: var(--plum); font-size: 0.85rem; }
-.quicklink-desc { color: var(--muted); font-size: 0.72rem; margin-top: 0.15rem; }
+.quicklink-text { display: flex; flex-direction: column; min-width: 0; }
+.quicklink-label {
+  font-family: 'Gloock', Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+  color: var(--plum);
+  font-size: 1.02rem;
+  margin: 0 0 0.3rem;
+}
+.quicklink-desc { color: var(--muted); font-size: 0.82rem; margin: 0; line-height: 1.4; }
 
-@media (max-width: 640px) {
+@media (max-width: 860px) {
   .quicklinks-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .quicklinks-grid { grid-template-columns: 1fr; }
 }
 
 .quicklink-chip {
-  width: 52px;
-  height: 52px;
-  border-radius: 10px;
-  border: 2px solid var(--gold);
-  margin-bottom: 0.5rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 4px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(155deg, var(--plum) 0%, var(--terracotta) 100%);
 }
-.quicklink-chip svg { width: 24px; height: 24px; stroke: var(--cream); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.quicklink-chip svg { width: 21px; height: 21px; stroke: var(--cream); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 
 .linkgroup { margin-bottom: 2.2rem; }
 .linkgroup:last-child { margin-bottom: 0; }
@@ -786,7 +804,7 @@ td { padding: 0.6rem; border-top: 1px solid var(--border); }
 .group-head-link { margin-top: 1rem; }
 .group-head-link a { font-size: 0.82rem; font-weight: 600; color: var(--terracotta-ink); }
 
-.badge-new { background: var(--terracotta); color: #fff; }
+.badge-new { background: var(--gold); color: var(--text); }
 
 /* --- Board posts: Colaboración / Oportunidades --- */
 .board-post { border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 1rem; }
