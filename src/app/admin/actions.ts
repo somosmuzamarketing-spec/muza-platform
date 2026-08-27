@@ -272,3 +272,108 @@ export async function resolveTicket(formData: FormData) {
   await prisma.supportTicket.update({ where: { id }, data: { status: "RESUELTO" } });
   revalidatePath("/admin");
 }
+
+// --- Muza del mes (Spotlight) ---
+export async function setSpotlight(formData: FormData) {
+  await requireAdmin();
+  const userId = String(formData.get("userId") || "").trim();
+  const quote = String(formData.get("quote") || "").trim();
+  const roleLabel = String(formData.get("roleLabel") || "").trim() || undefined;
+
+  if (!userId || !quote) throw new Error("Elige una muza y escribe una frase destacada.");
+
+  await prisma.spotlight.updateMany({ where: { isActive: true }, data: { isActive: false } });
+  await prisma.spotlight.create({ data: { userId, quote, roleLabel, isActive: true } });
+
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+}
+
+// --- Reto del mes (Challenge) ---
+export async function createChallenge(formData: FormData) {
+  await requireAdmin();
+  const title = String(formData.get("title") || "").trim();
+  const description = String(formData.get("description") || "").trim();
+
+  if (!title || !description) throw new Error("El reto necesita un título y una descripción.");
+
+  await prisma.challenge.updateMany({ where: { isActive: true }, data: { isActive: false } });
+  await prisma.challenge.create({ data: { title, description, isActive: true } });
+
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+}
+
+export async function closeChallenge(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("id"));
+  await prisma.challenge.update({ where: { id }, data: { isActive: false } });
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+}
+
+// --- Encuesta de la semana (Poll) ---
+export async function createPoll(formData: FormData) {
+  await requireAdmin();
+  const question = String(formData.get("question") || "").trim();
+  const options = [1, 2, 3, 4, 5]
+    .map((n) => String(formData.get(`option${n}`) || "").trim())
+    .filter(Boolean);
+
+  if (!question || options.length < 2) {
+    throw new Error("La encuesta necesita una pregunta y al menos 2 opciones.");
+  }
+
+  await prisma.poll.updateMany({ where: { isActive: true }, data: { isActive: false } });
+  await prisma.poll.create({
+    data: {
+      question,
+      isActive: true,
+      options: { create: options.map((label, i) => ({ label, order: i })) },
+    },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+}
+
+export async function closePoll(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("id"));
+  await prisma.poll.update({ where: { id }, data: { isActive: false } });
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+}
+
+// --- Moderación: Celebremos y tableros (Colaboración / Oportunidades) ---
+export async function deleteShoutout(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("id"));
+  await prisma.shoutout.delete({ where: { id } });
+  revalidatePath("/admin");
+  revalidatePath("/celebremos");
+  revalidatePath("/dashboard");
+}
+
+export async function closeBoardPost(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("id"));
+  const post = await prisma.boardPost.findUnique({ where: { id } });
+  if (!post) return;
+  await prisma.boardPost.update({
+    where: { id },
+    data: { status: post.status === "CERRADA" ? "ABIERTA" : "CERRADA" },
+  });
+  revalidatePath("/admin");
+  revalidatePath("/colaboracion");
+  revalidatePath("/oportunidades");
+}
+
+export async function deleteBoardPost(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("id"));
+  await prisma.boardPost.delete({ where: { id } });
+  revalidatePath("/admin");
+  revalidatePath("/colaboracion");
+  revalidatePath("/oportunidades");
+}
