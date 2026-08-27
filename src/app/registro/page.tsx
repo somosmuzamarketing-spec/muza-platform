@@ -41,9 +41,9 @@ export default function RegistroPage() {
         <circle cx="200" cy="200" r="200" stroke="#D8B46A" strokeWidth="1" opacity="0.22" />
       </svg>
       <div className="auth-card">
-        <Link href="/" className="logo" style={{ marginBottom: "1.5rem" }}>
+        <a href="https://somosmuza.com" className="logo" style={{ marginBottom: "1.5rem" }}>
           <img src="/logo-horizontal.png" alt="Muza" className="logo-img large" />
-        </Link>
+        </a>
         <span className="eyebrow" style={{ marginBottom: "0.6rem" }}>Únete a la comunidad</span>
         <span className="pill-banner">Cupos limitados</span>
         <h2 style={{ marginTop: "0.75rem" }}>Únete a Muza</h2>
