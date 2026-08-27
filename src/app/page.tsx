@@ -4,9 +4,9 @@ export default function Home() {
   return (
     <div>
       <header className="navbar">
-        <Link href="/" className="logo">
+        <a href="https://somosmuza.com" className="logo">
           <img src="/logo-horizontal.png" alt="Muza" className="logo-img" />
-        </Link>
+        </a>
         <div className="navlinks">
           <Link href="/login">Iniciar sesión</Link>
         </div>
