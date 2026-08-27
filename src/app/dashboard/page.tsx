@@ -25,6 +25,8 @@ export default async function Dashboard() {
     activePoll,
     shoutouts,
     birthdayCandidates,
+    upcomingEventsCount,
+    acceptedContactsCount,
   ] = await Promise.all([
       prisma.user.findUnique({ where: { id: userId } }),
       role === "ADMIN"
@@ -55,6 +57,10 @@ export default async function Dashboard() {
       }),
       prisma.shoutout.findMany({ include: { user: true }, orderBy: { createdAt: "desc" }, take: 12 }),
       prisma.user.findMany({ where: { birthDate: { not: null }, isActive: true } }),
+      prisma.event.count({ where: { startsAt: { gte: new Date() } } }),
+      prisma.contact.count({
+        where: { status: "ACEPTADO", OR: [{ requesterId: userId }, { contactId: userId }] },
+      }),
     ]);
 
   const name = user?.name || sessionName;
@@ -75,6 +81,7 @@ export default async function Dashboard() {
 
   const myChallengeEntry = activeChallenge?.entries.find((e) => e.userId === userId);
   const myPollVote = activePoll?.votes.find((v) => v.userId === userId);
+  const openChatsCount = rooms.filter((r) => r.type === "CHAT").length;
 
   const today = new Date();
   const todaysBirthdays = birthdayCandidates.filter((u) => {
@@ -101,55 +108,71 @@ export default async function Dashboard() {
   return (
     <div>
       <TopNav name={name} avatarUrl={user?.avatarUrl} role={role} plan={user?.plan} isMentor={user?.isMentor} />
-      <div className="container">
-        <div className="dashboard-hero">
-          <div className="dashboard-hero-avatar">
-            {user?.avatarUrl ? (
-              <img src={user.avatarUrl} alt={name} />
-            ) : (
-              <span>{(name || "M").trim().charAt(0).toUpperCase()}</span>
-            )}
+
+      <div className="welcome-band">
+        <div className="band-inner">
+          <div className="welcome-who">
+            <div className="welcome-avatar">
+              {user?.avatarUrl ? (
+                <img src={user.avatarUrl} alt={name} />
+              ) : (
+                <span>{(name || "M").trim().charAt(0).toUpperCase()}</span>
+              )}
+            </div>
+            <div>
+              <p className="eyebrow" style={{ marginBottom: "0.35rem" }}>
+                {role === "ADMIN" ? "Administradora" : user?.isMentor ? "Muza Mentora" : "Muza"}
+              </p>
+              <h1 style={{ margin: 0 }}>
+                Hola, {name || "Muza"} 👋
+                {user?.plan === "MUZA_PLUS" && <span className="badge gold" style={{ marginLeft: "0.5rem" }}>Muza+</span>}
+              </h1>
+            </div>
           </div>
-          <div>
-            <h2 style={{ marginBottom: "0.15rem" }}>Hola{name ? `, ${name}` : ""} 👋</h2>
-            <p style={{ color: "var(--muted)", margin: 0 }}>
-              {user?.title || "Bienvenida a tu espacio Muza."}
-              {user?.plan === "MUZA_PLUS" && <span className="badge gold" style={{ marginLeft: "0.5rem" }}>Muza+</span>}
-              {user?.isMentor && <span className="badge" style={{ marginLeft: "0.5rem" }}>Mentora</span>}
-            </p>
+          <div className="welcome-stats">
+            <div className="welcome-stat"><span className="n">{upcomingEventsCount}</span><span className="l">Eventos próx.</span></div>
+            <div className="welcome-stat"><span className="n">{acceptedContactsCount}</span><span className="l">Contactos</span></div>
+            <div className="welcome-stat"><span className="n">{openChatsCount}</span><span className="l">Chats abiertos</span></div>
           </div>
         </div>
+      </div>
 
-        <QuickLinks isMentor={user?.isMentor} />
-
-        {(activeSpotlight || activeChallenge || activePoll) && (
-          <>
-            <h3 style={{ marginTop: "2rem", marginBottom: 0 }}>Esta semana en Muza</h3>
+      {(activeSpotlight || activeChallenge || activePoll) && (
+        <div className="pulse-band">
+          <div className="band-inner">
+            <div className="pulse-head">
+              <h2>Esta semana en Muza</h2>
+              <span>— lo que está vivo en la comunidad ahora mismo</span>
+            </div>
             <div className="pulse-grid">
               {activeSpotlight && (
-                <div className="pulse-card">
+                <div className="pulse-card spotlight-card">
                   <span className="eyebrow">Muza del mes</span>
-                  <div className="spotlight-avatar">{initials(activeSpotlight.user.name || activeSpotlight.user.username)}</div>
+                  <div className="spotlight-row">
+                    <div className="spotlight-avatar">{initials(activeSpotlight.user.name || activeSpotlight.user.username)}</div>
+                    <div>
+                      <p className="spotlight-name">{activeSpotlight.user.name || activeSpotlight.user.username}</p>
+                      {activeSpotlight.roleLabel && <p className="spotlight-role">{activeSpotlight.roleLabel}</p>}
+                    </div>
+                  </div>
                   <p className="spotlight-quote">“{activeSpotlight.quote}”</p>
-                  <p className="spotlight-name">{activeSpotlight.user.name || activeSpotlight.user.username}</p>
-                  {activeSpotlight.roleLabel && <p className="spotlight-role">{activeSpotlight.roleLabel}</p>}
                 </div>
               )}
 
               {activeChallenge && (
-                <div className="pulse-card">
+                <div className="pulse-card challenge-card">
                   <span className="eyebrow">Reto del mes</span>
                   <h4>{activeChallenge.title}</h4>
-                  <p style={{ color: "var(--muted)", fontSize: "0.85rem", margin: "0 0 0.4rem" }}>
-                    {activeChallenge.description}
-                  </p>
+                  <p className="challenge-desc">{activeChallenge.description}</p>
                   <div className="challenge-meter">
-                    <div
-                      className="challenge-meter-fill"
-                      style={{ width: `${Math.min(activeChallenge.entries.length * 8, 100)}%` }}
-                    />
+                    <div className="challenge-meter-track">
+                      <div
+                        className="challenge-meter-fill"
+                        style={{ width: `${Math.min(activeChallenge.entries.length * 8, 100)}%` }}
+                      />
+                    </div>
+                    <span className="challenge-count">{activeChallenge.entries.length} muzas</span>
                   </div>
-                  <p className="challenge-count">{activeChallenge.entries.length} muzas ya participaron</p>
                   <ChallengeWidget
                     challengeId={activeChallenge.id}
                     hasEntry={!!myChallengeEntry}
@@ -159,7 +182,7 @@ export default async function Dashboard() {
               )}
 
               {activePoll && (
-                <div className="pulse-card">
+                <div className="pulse-card poll-card">
                   <span className="eyebrow">Encuesta de la semana</span>
                   <h4>{activePoll.question}</h4>
                   <PollWidget
@@ -170,29 +193,37 @@ export default async function Dashboard() {
                 </div>
               )}
             </div>
-          </>
-        )}
+          </div>
+        </div>
+      )}
 
-        {feedItems.length > 0 && (
-          <div className="card">
-            <h3 style={{ marginBottom: "0.2rem" }}>Celebremos 🎉</h3>
-            <p style={{ color: "var(--muted)", margin: 0, fontSize: "0.9rem" }}>
-              Logros y momentos especiales de la comunidad.
-            </p>
+      {feedItems.length > 0 && (
+        <div className="celebremos-band">
+          <div className="band-inner">
+            <div className="group-head">
+              <h2>Celebremos</h2>
+              <span>— logros y fechas de esta semana</span>
+            </div>
             <div className="feed-scroll">
               {feedItems.map((f) => (
                 <div key={f.key} className={`feed-item${f.birthday ? " birthday" : ""}`}>
                   <div className="feed-avatar">{initials(f.name)}</div>
-                  <p className="feed-name">{f.name}</p>
-                  <p className="feed-message">{f.message}</p>
+                  <div>
+                    <p className="feed-name">{f.name}</p>
+                    <p className="feed-message">{f.message}</p>
+                  </div>
                 </div>
               ))}
             </div>
-            <Link href="/celebremos" className="btn secondary" style={{ marginTop: "1rem" }}>
-              Ver todo / compartir un logro
-            </Link>
+            <div className="group-head-link">
+              <Link href="/celebremos">Ver todo / compartir un logro →</Link>
+            </div>
           </div>
-        )}
+        </div>
+      )}
+
+      <div className="container">
+        <QuickLinks isMentor={user?.isMentor} />
 
         {nextConversatorio && (
           <div className="card event-teaser">
