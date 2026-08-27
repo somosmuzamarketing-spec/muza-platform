@@ -1,0 +1,275 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// role: "ADMIN" | "MEMBER"
+// type (Room): "CHAT" | "VIDEO"
+// status (PaymentRequest): "PENDING" | "PAID" | "APPROVED" | "REJECTED"
+// plan (User): "MIEMBRO" | "MUZA_PLUS"
+// status (Contact): "PENDIENTE" | "ACEPTADO"
+// type (Event): "EVENTO" | "TALLER" | "WEBINAR" | "NETWORKING" | "CONVERSATORIO"
+// status (SupportTicket): "ABIERTO" | "RESUELTO"
+// type (Nomination): "MENTORA" | "WEBINAR" | "CHAT" | "ARTICULO" | "MUZA"
+// status (Nomination): "PENDIENTE" | "APROBADA" | "RECHAZADA"
+// type (Shoutout): "LOGRO" | "CUMPLEANOS"
+// kind (BoardPost): "COLABORACION" | "OPORTUNIDAD"
+// status (BoardPost): "ABIERTA" | "CERRADA"
+
+model User {
+  id           String       @id @default(cuid())
+  username     String       @unique
+  passwordHash String
+  name         String?
+  email        String?      @unique
+
+  // --- Identidad de perfil ---
+  avatarUrl    String?      @db.Text // dataURL (base64) de la foto de perfil
+  bio          String?      @db.Text
+  title        String?      // ej. "Fundadora de Estudio Luna", "Coach de negocios"
+  plan         String       @default("MIEMBRO") // MIEMBRO | MUZA_PLUS
+  isMentor     Boolean      @default(false)
+  birthDate    DateTime?    // opcional, para el feed de cumpleaños en Celebremos
+
+  role         String       @default("MEMBER")
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+
+  memberships       Membership[]
+  messages          Message[]
+  reservations      EventReservation[]
+  supportTickets    SupportTicket[]
+  nominations       Nomination[]
+  contactsSent      Contact[]          @relation("ContactRequester")
+  contactsReceived  Contact[]          @relation("ContactReceiver")
+
+  spotlights        Spotlight[]
+  challengeEntries  ChallengeEntry[]
+  pollVotes         PollVote[]
+  shoutouts         Shoutout[]
+  boardPosts        BoardPost[]
+}
+
+model Room {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  type        String
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  memberships Membership[]
+  messages    Message[]
+  events      Event[]
+}
+
+model Membership {
+  id       String   @id @default(cuid())
+  userId   String
+  roomId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room     Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  joinedAt DateTime @default(now())
+
+  @@unique([userId, roomId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  roomId    String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PaymentRequest {
+  id                  String    @id @default(cuid())
+  fullName            String
+  email               String
+  stripeSessionId     String?   @unique
+  stripeCustomerId    String?
+  status              String    @default("PENDING")
+  createdAt           DateTime  @default(now())
+  approvedAt          DateTime?
+  generatedUsername   String?
+  referredByUsername  String?   // usuario que la invitó (programa de referidos)
+}
+
+// --- Directorio de contactos entre miembros ---
+model Contact {
+  id          String   @id @default(cuid())
+  requesterId String
+  contactId   String
+  status      String   @default("PENDIENTE") // PENDIENTE | ACEPTADO
+  createdAt   DateTime @default(now())
+
+  requester User @relation("ContactRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  contact   User @relation("ContactReceiver", fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, contactId])
+}
+
+// --- Eventos y reservas de cupo ---
+model Event {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  type         String   @default("EVENTO") // EVENTO | TALLER | WEBINAR | NETWORKING | CONVERSATORIO
+  startsAt     DateTime
+  isOnline     Boolean  @default(true)
+  location     String?  // dirección si es presencial
+  roomId       String?  // sala de video vinculada (opcional)
+  externalLink String?  // link externo de info/acceso (Zoom, Meet, WhatsApp, etc.)
+  bannerUrl    String?  // imagen de banner del evento (dataURL base64)
+  capacity     Int?     // null = sin límite de cupo
+  createdAt    DateTime @default(now())
+
+  room         Room?              @relation(fields: [roomId], references: [id])
+  reservations EventReservation[]
+}
+
+model EventReservation {
+  id        String   @id @default(cuid())
+  eventId   String
+  userId    String
+  createdAt DateTime @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+}
+
+// --- Contacto con soporte Muza ---
+model SupportTicket {
+  id        String   @id @default(cuid())
+  userId    String
+  subject   String
+  message   String
+  status    String   @default("ABIERTO") // ABIERTO | RESUELTO
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// --- Nominaciones: mentora Muza / participante de webinars / nominar a una Muza ---
+model Nomination {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // MENTORA | WEBINAR | CHAT | ARTICULO | MUZA
+  topic     String?  // área de expertise (mentora) o tema propuesto (webinar)
+  message   String
+
+  // --- Datos de la persona nominada (type MUZA: la miembro nomina a otra mujer) ---
+  nomineeName  String? // nombre de la mujer nominada
+  nomineeEmail String? // email de la mujer nominada
+  nomineePhone String? // teléfono de la mujer nominada
+
+  status    String   @default("PENDIENTE") // PENDIENTE | APROBADA | RECHAZADA
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// --- Muza del mes ---
+model Spotlight {
+  id        String   @id @default(cuid())
+  userId    String
+  quote     String   @db.Text
+  roleLabel String?  // ej. "Fundadora de Estudio Luna"
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// --- Reto del mes ---
+model Challenge {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  entries ChallengeEntry[]
+}
+
+model ChallengeEntry {
+  id          String   @id @default(cuid())
+  challengeId String
+  userId      String
+  content     String   @db.Text
+  createdAt   DateTime @default(now())
+
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([challengeId, userId])
+}
+
+// --- Encuesta de la semana ---
+model Poll {
+  id        String   @id @default(cuid())
+  question  String
+  isActive  Boolean  @default(true)
+  closesAt  DateTime?
+  createdAt DateTime @default(now())
+
+  options PollOption[]
+  votes   PollVote[]
+}
+
+model PollOption {
+  id     String @id @default(cuid())
+  pollId String
+  label  String
+  order  Int    @default(0)
+
+  poll  Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  votes PollVote[]
+}
+
+model PollVote {
+  id        String   @id @default(cuid())
+  pollId    String
+  optionId  String
+  userId    String
+  createdAt DateTime @default(now())
+
+  poll   Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  option PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pollId, userId])
+}
+
+// --- Celebremos: logros y menciones de la comunidad ---
+model Shoutout {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   @default("LOGRO") // LOGRO | CUMPLEANOS
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// --- Busco colaboradora / Bolsa de oportunidades ---
+model BoardPost {
+  id          String   @id @default(cuid())
+  userId      String
+  kind        String   // COLABORACION | OPORTUNIDAD
+  title       String
+  description String   @db.Text
+  category    String?
+  link        String?
+  status      String   @default("ABIERTA") // ABIERTA | CERRADA
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
