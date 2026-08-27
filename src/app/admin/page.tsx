@@ -14,6 +14,14 @@ import {
   updateEventBanner,
   resolveNomination,
   resolveTicket,
+  setSpotlight,
+  createChallenge,
+  closeChallenge,
+  createPoll,
+  closePoll,
+  deleteShoutout,
+  closeBoardPost,
+  deleteBoardPost,
 } from "./actions";
 import CreateMemberForm from "@/components/CreateMemberForm";
 import ApproveRequestButton from "@/components/ApproveRequestButton";
@@ -32,13 +40,34 @@ export default async function AdminPage() {
   const session = await getServerSession(authOptions);
   if ((session?.user as any)?.role !== "ADMIN") redirect("/dashboard");
 
-  const [members, rooms, pendingRequests, events, pendingNominations, openTickets] = await Promise.all([
+  const [
+    members,
+    rooms,
+    pendingRequests,
+    events,
+    pendingNominations,
+    openTickets,
+    activeSpotlight,
+    activeChallenge,
+    activePoll,
+    recentShoutouts,
+    recentBoardPosts,
+  ] = await Promise.all([
     prisma.user.findMany({ where: { role: "MEMBER" }, include: { memberships: true }, orderBy: { createdAt: "desc" } }),
     prisma.room.findMany({ orderBy: { createdAt: "asc" } }),
     prisma.paymentRequest.findMany({ where: { status: "PAID" }, orderBy: { createdAt: "asc" } }),
     prisma.event.findMany({ orderBy: { startsAt: "asc" }, include: { reservations: true } }),
     prisma.nomination.findMany({ where: { status: "PENDIENTE" }, include: { user: true }, orderBy: { createdAt: "asc" } }),
     prisma.supportTicket.findMany({ where: { status: "ABIERTO" }, include: { user: true }, orderBy: { createdAt: "asc" } }),
+    prisma.spotlight.findFirst({ where: { isActive: true }, include: { user: true }, orderBy: { createdAt: "desc" } }),
+    prisma.challenge.findFirst({ where: { isActive: true }, include: { entries: true }, orderBy: { createdAt: "desc" } }),
+    prisma.poll.findFirst({
+      where: { isActive: true },
+      include: { options: { include: { votes: true }, orderBy: { order: "asc" } } },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.shoutout.findMany({ include: { user: true }, orderBy: { createdAt: "desc" }, take: 15 }),
+    prisma.boardPost.findMany({ include: { user: true }, orderBy: { createdAt: "desc" }, take: 15 }),
   ]);
 
   return (
@@ -233,6 +262,130 @@ export default async function AdminPage() {
         </div>
 
         <div className="card">
+          <h2>Muza del mes</h2>
+          <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
+            Elige a la miembro destacada y una frase suya. Se muestra en el dashboard hasta que elijas otra.
+          </p>
+          {activeSpotlight && (
+            <p style={{ color: "var(--purple)", fontWeight: 600 }}>
+              Actual: {activeSpotlight.user.name || activeSpotlight.user.username} — “{activeSpotlight.quote}”
+            </p>
+          )}
+          <form action={setSpotlight}>
+            <select name="userId" defaultValue="" required>
+              <option value="" disabled>Elige una miembro</option>
+              {members.map((m) => (
+                <option key={m.id} value={m.id}>{m.name || m.username}</option>
+              ))}
+            </select>
+            <input name="roleLabel" placeholder="Rol o título (opcional): Fundadora de..." />
+            <textarea name="quote" rows={3} placeholder="Frase o testimonio destacado" required />
+            <button type="submit">Publicar muza del mes</button>
+          </form>
+        </div>
+
+        <div className="card">
+          <h2>Reto del mes</h2>
+          <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
+            Crea un reto nuevo; al publicarlo se reemplaza el reto activo anterior.
+          </p>
+          {activeChallenge && (
+            <p style={{ color: "var(--purple)", fontWeight: 600 }}>
+              Activo: {activeChallenge.title} · {activeChallenge.entries.length} participaciones
+              {" "}
+              <form action={closeChallenge} style={{ display: "inline" }}>
+                <input type="hidden" name="id" value={activeChallenge.id} />
+                <button type="submit" className="secondary" style={{ marginLeft: "0.5rem" }}>Cerrar reto</button>
+              </form>
+            </p>
+          )}
+          <form action={createChallenge}>
+            <input name="title" placeholder="Título del reto" required />
+            <textarea name="description" rows={3} placeholder="Descripción: qué debe hacer la miembro para participar" required />
+            <button type="submit">Publicar reto del mes</button>
+          </form>
+        </div>
+
+        <div className="card">
+          <h2>Encuesta de la semana</h2>
+          <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
+            Crea una encuesta nueva; al publicarla se reemplaza la encuesta activa anterior.
+          </p>
+          {activePoll && (
+            <div style={{ marginBottom: "0.9rem" }}>
+              <p style={{ color: "var(--purple)", fontWeight: 600, marginBottom: "0.3rem" }}>
+                Activa: {activePoll.question}
+              </p>
+              {activePoll.options.map((o) => (
+                <p key={o.id} style={{ color: "var(--muted)", fontSize: "0.85rem", margin: 0 }}>
+                  {o.label}: {o.votes.length} votos
+                </p>
+              ))}
+              <form action={closePoll}>
+                <input type="hidden" name="id" value={activePoll.id} />
+                <button type="submit" className="secondary" style={{ marginTop: "0.5rem" }}>Cerrar encuesta</button>
+              </form>
+            </div>
+          )}
+          <form action={createPoll}>
+            <input name="question" placeholder="Pregunta de la encuesta" required />
+            <input name="option1" placeholder="Opción 1" required />
+            <input name="option2" placeholder="Opción 2" required />
+            <input name="option3" placeholder="Opción 3 (opcional)" />
+            <input name="option4" placeholder="Opción 4 (opcional)" />
+            <input name="option5" placeholder="Opción 5 (opcional)" />
+            <button type="submit">Publicar encuesta</button>
+          </form>
+        </div>
+
+        {recentShoutouts.length > 0 && (
+          <div className="card">
+            <h2>Moderar Celebremos</h2>
+            {recentShoutouts.map((s) => (
+              <div key={s.id} style={{ borderTop: "1px solid var(--border)", paddingTop: "0.75rem", marginTop: "0.75rem" }}>
+                <p style={{ marginBottom: "0.2rem" }}>
+                  <span className="badge">{s.type === "CUMPLEANOS" ? "Cumpleaños" : "Logro"}</span>{" "}
+                  <strong>{s.user.name || s.user.username}</strong>
+                </p>
+                <p style={{ color: "var(--muted)" }}>{s.message}</p>
+                <form action={deleteShoutout}>
+                  <input type="hidden" name="id" value={s.id} />
+                  <button type="submit" className="secondary">Eliminar</button>
+                </form>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {recentBoardPosts.length > 0 && (
+          <div className="card">
+            <h2>Moderar Colaboración y Oportunidades</h2>
+            {recentBoardPosts.map((p) => (
+              <div key={p.id} style={{ borderTop: "1px solid var(--border)", paddingTop: "0.75rem", marginTop: "0.75rem" }}>
+                <p style={{ marginBottom: "0.2rem" }}>
+                  <span className="badge">{p.kind === "OPORTUNIDAD" ? "Oportunidad" : "Colaboración"}</span>{" "}
+                  <span className="badge gold">{p.status}</span>{" "}
+                  <strong>{p.title}</strong> — {p.user.name || p.user.username}
+                </p>
+                <p style={{ color: "var(--muted)" }}>{p.description}</p>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <form action={closeBoardPost}>
+                    <input type="hidden" name="id" value={p.id} />
+                    <button type="submit" className="secondary">
+                      {p.status === "CERRADA" ? "Reabrir" : "Cerrar"}
+                    </button>
+                  </form>
+                  <form action={deleteBoardPost}>
+                    <input type="hidden" name="id" value={p.id} />
+                    <button type="submit" className="secondary">Eliminar</button>
+                  </form>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="card">
           <h2>Miembros y acceso a salas</h2>
           <table>
             <thead>
@@ -263,8 +416,8 @@ export default async function AdminPage() {
                           <input type="hidden" name="userId" value={m.id} />
                           <input type="hidden" name="roomId" value={room.id} />
                           <button type="submit" className={has ? "" : "secondary"}>{has ? "✓" : "+"}</button>
-                        </form>
-                      </td>
+                      </form>
+                    </td>
                     );
                   })}
                   <td style={{ textAlign: "center" }}>
