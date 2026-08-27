@@ -18,9 +18,9 @@ export default function TopNav({ name, avatarUrl, role, plan, isMentor }: TopNav
 
   return (
     <header className="navbar">
-      <Link href="/dashboard" className="logo">
+      <a href="https://somosmuza.com" className="logo">
         <img src="/logo-horizontal.png" alt="Muza" className="logo-img" />
-      </Link>
+      </a>
 
       <div className="navlinks">
         <Link href="/contactos">Contactos</Link>
