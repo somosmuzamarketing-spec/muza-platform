@@ -2,11 +2,11 @@
 import { useFormState, useFormStatus } from "react-dom";
 import { submitChallengeEntry } from "@/app/dashboard/actions";
 
-function SubmitButton() {
+function SubmitButton({ isUpdate }: { isUpdate: boolean }) {
   const { pending } = useFormStatus();
   return (
     <button type="submit" className="btn gold" disabled={pending} style={{ width: "100%" }}>
-      {pending ? "Enviando..." : "Participar"}
+      {pending ? "Enviando..." : isUpdate ? "Actualizar mi participación" : "Participar"}
     </button>
   );
 }
@@ -21,13 +21,15 @@ export default function ChallengeWidget({
   entryContent?: string;
 }) {
   const [state, formAction] = useFormState(submitChallengeEntry, null);
-
-  if (state?.ok || hasEntry) {
-    return <p className="poll-voted-note">✓ Ya registramos tu participación en el reto de este mes.</p>;
-  }
+  const isUpdate = hasEntry || !!state?.ok;
 
   return (
     <form action={formAction}>
+      {isUpdate && (
+        <p className="poll-voted-note" style={{ marginBottom: "0.5rem" }}>
+          ✓ Ya registramos tu participación en el reto de este mes. Puedes actualizar tu respuesta aquí.
+        </p>
+      )}
       <input type="hidden" name="challengeId" value={challengeId} />
       <textarea
         name="content"
@@ -37,7 +39,7 @@ export default function ChallengeWidget({
         required
       />
       {state?.error && <p style={{ color: "var(--danger)", fontSize: "0.8rem" }}>{state.error}</p>}
-      <SubmitButton />
+      <SubmitButton isUpdate={isUpdate} />
     </form>
   );
 }
