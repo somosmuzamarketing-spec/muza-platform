@@ -39,6 +39,9 @@ export async function submitChallengeEntry(_prev: SimpleResult, formData: FormDa
     const content = String(formData.get("content") || "").trim();
     if (!challengeId || !content) return { error: "Cuéntanos cómo participaste en el reto." };
 
+    const challenge = await prisma.challenge.findUnique({ where: { id: challengeId } });
+    if (!challenge) return { error: "Este reto ya no está disponible." };
+
     const existing = await prisma.challengeEntry.findUnique({
       where: { challengeId_userId: { challengeId, userId } },
     });
@@ -46,10 +49,22 @@ export async function submitChallengeEntry(_prev: SimpleResult, formData: FormDa
       await prisma.challengeEntry.update({ where: { id: existing.id }, data: { content } });
     } else {
       await prisma.challengeEntry.create({ data: { challengeId, userId, content } });
-      // First time participating in this challenge: also publish it on the Celebremos
-      // wall, since the challenge card promises "se publica en el muro de Celebremos".
+    }
+
+    // Publish this entry on the Celebremos wall, since the challenge card promises
+    // "se publica en el muro de Celebremos". Some entries were created before this
+    // linking existed, so don't rely only on "is this a brand-new entry" — instead
+    // check directly whether this user already has a RETO post for THIS challenge
+    // (any RETO shoutout of theirs created since this challenge started counts).
+    const alreadyShared = await prisma.shoutout.findFirst({
+      where: { userId, type: "RETO", createdAt: { gte: challenge.createdAt } },
+    });
+    if (alreadyShared) {
+      await prisma.shoutout.update({ where: { id: alreadyShared.id }, data: { message: content } });
+    } else {
       await prisma.shoutout.create({ data: { userId, type: "RETO", message: content } });
     }
+
     revalidatePath("/dashboard");
     revalidatePath("/celebremos");
     return { ok: true };
