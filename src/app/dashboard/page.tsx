@@ -27,6 +27,7 @@ export default async function Dashboard() {
     birthdayCandidates,
     upcomingEventsCount,
     acceptedContactsCount,
+    allStars,
   ] = await Promise.all([
       prisma.user.findUnique({ where: { id: userId } }),
       role === "ADMIN"
@@ -61,6 +62,7 @@ export default async function Dashboard() {
       prisma.contact.count({
         where: { status: "ACEPTADO", OR: [{ requesterId: userId }, { contactId: userId }] },
       }),
+      prisma.star.findMany({ include: { receiver: true } }),
     ]);
 
   const name = user?.name || sessionName;
@@ -82,6 +84,24 @@ export default async function Dashboard() {
   const myChallengeEntry = activeChallenge?.entries.find((e) => e.userId === userId);
   const myPollVote = activePoll?.votes.find((v) => v.userId === userId);
   const openChatsCount = rooms.filter((r) => r.type === "CHAT").length;
+
+  // "Muzas más colaborativas": ranking por cantidad de estrellas recibidas.
+  const starCounts = new Map<string, { name: string; avatarUrl?: string | null; count: number }>();
+  for (const s of allStars) {
+    const entry = starCounts.get(s.receiverId);
+    if (entry) {
+      entry.count += 1;
+    } else {
+      starCounts.set(s.receiverId, {
+        name: s.receiver.name || s.receiver.username,
+        avatarUrl: s.receiver.avatarUrl,
+        count: 1,
+      });
+    }
+  }
+  const topMuzas = Array.from(starCounts.values())
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
 
   const today = new Date();
   const todaysBirthdays = birthdayCandidates.filter((u) => {
@@ -309,6 +329,22 @@ export default async function Dashboard() {
             <h3>Invita a una amiga</h3>
             <p style={{ color: "var(--muted)" }}>Comparte tu enlace personal y ayúdanos a hacer crecer la comunidad.</p>
             <ReferralBox link={referralLink} />
+          </div>
+        )}
+
+        {topMuzas.length > 0 && (
+          <div className="card">
+            <h3>🤝 Muzas más colaborativas</h3>
+            <p style={{ color: "var(--muted)", marginTop: "-0.5rem" }}>
+              Reconocimientos recibidos de otras muzas de la comunidad.
+            </p>
+            {topMuzas.map((m, i) => (
+              <div key={`${m.name}-${i}`} className="leaderboard-row">
+                <span className="leaderboard-rank">{i + 1}</span>
+                <span className="leaderboard-name">{m.name}</span>
+                <span className="leaderboard-stars">⭐ {m.count}</span>
+              </div>
+            ))}
           </div>
         )}
 
