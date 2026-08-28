@@ -30,9 +30,9 @@ export default async function Dashboard() {
   ] = await Promise.all([
       prisma.user.findUnique({ where: { id: userId } }),
       role === "ADMIN"
-        ? prisma.room.findMany({ where: { isActive: true } })
+        ? prisma.room.findMany({ where: { isActive: true, type: { not: "DM" } } })
         : prisma.room.findMany({
-            where: { isActive: true, memberships: { some: { userId } } },
+            where: { isActive: true, type: { not: "DM" }, memberships: { some: { userId } } },
           }),
       prisma.event.findFirst({
         where: { startsAt: { gte: new Date() } },
