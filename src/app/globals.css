@@ -595,10 +595,49 @@ input::placeholder, textarea::placeholder { color: var(--muted); }
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 14px;
-  overflow: hidden;
+  overflow: visible;
   text-align: center;
+  position: relative;
   transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
+.contact-card-cover { border-radius: 14px 14px 0 0; }
+
+/* "..." menu on a contact card (e.g. Eliminar conexión) */
+.kebab-wrap { position: absolute; top: 8px; right: 8px; z-index: 2; }
+.kebab-btn {
+  background: var(--cream-soft);
+  color: var(--plum);
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 1rem;
+  line-height: 1;
+}
+.kebab-btn:hover { background: #fff; }
+.kebab-menu {
+  position: absolute;
+  top: 32px;
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(21, 12, 20, 0.15);
+  min-width: 170px;
+  text-align: left;
+  overflow: hidden;
+}
+.kebab-menu button {
+  width: 100%;
+  background: transparent;
+  color: var(--danger);
+  border-radius: 0;
+  padding: 0.6rem 0.8rem;
+  font-weight: 500;
+  font-size: 0.82rem;
+  justify-content: flex-start;
+}
+.kebab-menu button:hover { background: var(--cream-soft); transform: none; opacity: 1; }
 
 .contact-card:hover {
   border-color: var(--gold);
