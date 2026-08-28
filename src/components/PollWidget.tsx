@@ -7,8 +7,13 @@ type Option = { id: string; label: string; voteCount: number };
 function VoteButton({ label, pct }: { label: string; pct: number }) {
   const { pending } = useFormStatus();
   return (
-    <button type="submit" className="poll-vote-btn" disabled={pending} style={{ background: "transparent" }}>
-      <div className="poll-opt" style={{ margin: 0 }}>
+    <button
+      type="submit"
+      className="poll-vote-btn"
+      disabled={pending}
+      style={{ background: "transparent", display: "block", width: "100%" }}
+    >
+      <div className="poll-opt" style={{ margin: 0, width: "100%" }}>
         <div className="poll-opt-label">
           <span>{label}</span>
           <span>{pct}%</span>
