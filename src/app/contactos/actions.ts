@@ -56,3 +56,30 @@ export async function removeContact(formData: FormData) {
   await prisma.contact.delete({ where: { id: contactRequestId } });
   revalidatePath("/contactos");
 }
+
+// "⭐ Agradecer": deja un reconocimiento a un contacto ya conectado.
+// Un mismo par (giver, receiver) solo puede tener una estrella (constraint única en la BD).
+export async function giveStar(formData: FormData) {
+  const giverId = await requireUserId();
+  const receiverId = String(formData.get("otherId") || "");
+  if (!receiverId || receiverId === giverId) return;
+
+  const contact = await prisma.contact.findFirst({
+    where: {
+      status: "ACEPTADO",
+      OR: [
+        { requesterId: giverId, contactId: receiverId },
+        { requesterId: receiverId, contactId: giverId },
+      ],
+    },
+  });
+  if (!contact) return;
+
+  try {
+    await prisma.star.create({ data: { giverId, receiverId } });
+  } catch {
+    // Ya le había dado una estrella a esta persona; no hacemos nada.
+  }
+  revalidatePath("/contactos");
+  revalidatePath("/dashboard");
+}
