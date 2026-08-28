@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import TopNav from "@/components/TopNav";
 import ContactCardMenu from "@/components/ContactCardMenu";
 import { requestContact, respondContact, removeContact } from "./actions";
+import { openConversation } from "@/app/mensajes/actions";
 
 function Avatar({
   url,
@@ -130,6 +131,10 @@ export default async function ContactosPage() {
                       <RoleBadges role={other.role} isMentor={other.isMentor} />
                     </div>
                     {other.title && <div className="contact-card-title">{other.title}</div>}
+                    <form action={openConversation}>
+                      <input type="hidden" name="otherId" value={other.id} />
+                      <button type="submit" className="contact-card-msg-btn">✉️ Enviar mensaje</button>
+                    </form>
                   </div>
                 </div>
               );
