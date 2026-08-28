@@ -19,6 +19,7 @@ datasource db {
 // type (Shoutout): "LOGRO" | "CUMPLEANOS"
 // kind (BoardPost): "COLABORACION" | "OPORTUNIDAD"
 // status (BoardPost): "ABIERTA" | "CERRADA"
+// Star: reconocimiento ("⭐ Agradecer") de una muza hacia otra, por contacto conectado
 
 model User {
   id           String       @id @default(cuid())
@@ -52,6 +53,8 @@ model User {
   pollVotes         PollVote[]
   shoutouts         Shoutout[]
   boardPosts        BoardPost[]
+  starsGiven        Star[]             @relation("StarGiver")
+  starsReceived     Star[]             @relation("StarReceiver")
 }
 
 model Room {
@@ -272,4 +275,18 @@ model BoardPost {
   createdAt   DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// --- Reconocimiento entre muzas: "⭐ Agradecer" a un contacto conectado ---
+model Star {
+  id         String   @id @default(cuid())
+  giverId    String
+  receiverId String
+  note       String?
+  createdAt  DateTime @default(now())
+
+  giver    User @relation("StarGiver", fields: [giverId], references: [id], onDelete: Cascade)
+  receiver User @relation("StarReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([giverId, receiverId])
 }
