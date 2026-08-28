@@ -50,13 +50,46 @@ export async function createMember(_prev: ActionResult, formData: FormData): Pro
     const name = String(formData.get("name") || "").trim();
     const email = String(formData.get("email") || "").trim() || undefined;
     let username = String(formData.get("username") || "").trim();
+    const title = String(formData.get("title") || "").trim() || undefined;
+
+    let avatarUrl = String(formData.get("avatarUrl") || "").trim();
+    if (avatarUrl && !avatarUrl.startsWith("data:image/")) {
+      return { error: "Formato de imagen no válido." };
+    }
+    if (avatarUrl.length > 2_000_000) {
+      return { error: "La imagen sigue siendo muy pesada, prueba con otra." };
+    }
+
+    // Mismo formato de bio estructurada que usa /perfil: secciones marcadas
+    // con [[Etiqueta]], que la página de perfil separa y renderiza. La
+    // sección "Mensaje a las Muzas" recibe estilo destacado automáticamente.
+    const bioSections: [string, string][] = [
+      ["A qué se dedica", String(formData.get("bioNegocio") || "").trim()],
+      ["Lo que le apasiona", String(formData.get("bioPasion") || "").trim()],
+      ["Mensaje a las Muzas", String(formData.get("bioMensaje") || "").trim()],
+      ["Su mayor orgullo", String(formData.get("bioOrgullo") || "").trim()],
+    ];
+    const bio =
+      bioSections
+        .filter(([, text]) => text.length > 0)
+        .map(([label, text]) => `[[${label}]]\n${text}`)
+        .join("\n\n") || undefined;
 
     if (!username) username = slugifyUsername(name || email || "miembro");
     const password = generatePassword();
     const passwordHash = await bcrypt.hash(password, 10);
 
     const user = await prisma.user.create({
-      data: { username, passwordHash, name, email, role: "MEMBER" },
+      data: {
+        username,
+        passwordHash,
+        name,
+        email,
+        role: "MEMBER",
+        title,
+        bio,
+        avatarUrl: avatarUrl || undefined,
+      },
     });
 
     const welcomeRoomId = await getWelcomeRoomId();
