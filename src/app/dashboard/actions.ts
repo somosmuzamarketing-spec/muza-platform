@@ -46,8 +46,12 @@ export async function submitChallengeEntry(_prev: SimpleResult, formData: FormDa
       await prisma.challengeEntry.update({ where: { id: existing.id }, data: { content } });
     } else {
       await prisma.challengeEntry.create({ data: { challengeId, userId, content } });
+      // First time participating in this challenge: also publish it on the Celebremos
+      // wall, since the challenge card promises "se publica en el muro de Celebremos".
+      await prisma.shoutout.create({ data: { userId, type: "RETO", message: content } });
     }
     revalidatePath("/dashboard");
+    revalidatePath("/celebremos");
     return { ok: true };
   } catch (e: any) {
     return { error: e.message || "No se pudo enviar tu participación." };
