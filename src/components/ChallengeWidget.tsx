@@ -39,6 +39,11 @@ export default function ChallengeWidget({
         required
       />
       {state?.error && <p style={{ color: "var(--danger)", fontSize: "0.8rem" }}>{state.error}</p>}
+      {state?.ok && (
+        <p className="poll-voted-note" style={{ color: "var(--purple)", fontWeight: 600 }}>
+          ✓ Guardado. Gracias por participar.
+        </p>
+      )}
       <SubmitButton isUpdate={isUpdate} />
     </form>
   );
