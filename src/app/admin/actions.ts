@@ -102,6 +102,28 @@ export async function createMember(_prev: ActionResult, formData: FormData): Pro
   }
 }
 
+export type ResetPasswordResult = { password?: string; error?: string } | null;
+
+export async function resetMemberPassword(
+  _prev: ResetPasswordResult,
+  formData: FormData
+): Promise<ResetPasswordResult> {
+  try {
+    await requireAdmin();
+    const userId = String(formData.get("userId") || "").trim();
+    if (!userId) return { error: "Falta el miembro." };
+
+    const password = generatePassword();
+    const passwordHash = await bcrypt.hash(password, 10);
+    await prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+
+    revalidatePath("/admin");
+    return { password };
+  } catch (e: any) {
+    return { error: e.message || "No se pudo restablecer la clave." };
+  }
+}
+
 export async function createRoom(formData: FormData) {
   await requireAdmin();
   const name = String(formData.get("name") || "").trim();
