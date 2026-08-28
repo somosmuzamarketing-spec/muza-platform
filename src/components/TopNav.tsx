@@ -47,6 +47,7 @@ export default async function TopNav({ name, avatarUrl, role, plan, isMentor }: 
             </span>
           )}
         </Link>
+        <Link href="/mensajes">Mensajes</Link>
         <Link href="/eventos">Eventos</Link>
         <Link href="/soporte">Soporte</Link>
         {role === "ADMIN" && <Link href="/admin">Administración</Link>}
