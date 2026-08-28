@@ -686,6 +686,48 @@ input::placeholder, textarea::placeholder { color: var(--muted); }
   margin-top: 0.3rem;
 }
 
+.contact-card-star-btn {
+  width: 100%;
+  font-size: 0.78rem;
+  padding: 0.45rem 0.6rem;
+  margin-top: 0.4rem;
+  background: var(--gold);
+  color: var(--text);
+}
+.contact-card-star-btn:hover { background: var(--gold); opacity: 0.85; }
+.contact-card-star-btn.given {
+  background: var(--cream-soft);
+  color: var(--muted);
+  cursor: default;
+  opacity: 1;
+}
+.contact-card-star-btn.given:hover { background: var(--cream-soft); opacity: 1; }
+
+/* "Muzas más colaborativas": leaderboard de reconocimientos */
+.leaderboard-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--cream-soft);
+}
+.leaderboard-row:last-child { border-bottom: none; }
+.leaderboard-rank {
+  width: 1.4rem;
+  text-align: center;
+  font-weight: 700;
+  color: var(--gold-dim, var(--muted));
+  flex-shrink: 0;
+}
+.leaderboard-name { flex: 1; font-weight: 600; font-size: 0.9rem; min-width: 0; }
+.leaderboard-stars {
+  color: var(--terracotta-ink);
+  font-weight: 700;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Mensajes: bandeja de conversaciones directas */
 .dm-list { display: flex; flex-direction: column; }
 .dm-row {
