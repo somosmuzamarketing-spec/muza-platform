@@ -738,6 +738,7 @@ td { padding: 0.6rem; border-top: 1px solid var(--border); }
   display: flex; align-items: center; justify-content: center;
   background: rgba(255, 255, 255, 0.12); border: 2px solid var(--gold);
   color: var(--gold); font-weight: 600; font-size: 1.1rem; margin-bottom: 0;
+  object-fit: cover;
 }
 .spotlight-name { font-family: 'Gloock', Georgia, 'Times New Roman', serif; font-weight: 400; font-size: 1.1rem; margin: 0; color: var(--cream); }
 .spotlight-role { font-size: 0.78rem; color: var(--gold-dim); margin: 0.2rem 0 0; }
