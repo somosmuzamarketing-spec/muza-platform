@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import TopNav from "@/components/TopNav";
 import ContactCardMenu from "@/components/ContactCardMenu";
-import { requestContact, respondContact, removeContact } from "./actions";
+import { requestContact, respondContact, removeContact, giveStar } from "./actions";
 import { openConversation } from "@/app/mensajes/actions";
 
 function Avatar({
@@ -47,7 +47,7 @@ export default async function ContactosPage() {
   const me = await prisma.user.findUnique({ where: { id: userId } });
   const role = (session?.user as any)?.role;
 
-  const [allContacts, everyone] = await Promise.all([
+  const [allContacts, everyone, starsGiven] = await Promise.all([
     prisma.contact.findMany({
       where: { OR: [{ requesterId: userId }, { contactId: userId }] },
       include: { requester: true, contact: true },
@@ -58,7 +58,10 @@ export default async function ContactosPage() {
       orderBy: { name: "asc" },
       take: 100,
     }),
+    prisma.star.findMany({ where: { giverId: userId } }),
   ]);
+
+  const starredIds = new Set(starsGiven.map((s) => s.receiverId));
 
   const received = allContacts.filter((c) => c.contactId === userId && c.status === "PENDIENTE");
   const sent = allContacts.filter((c) => c.requesterId === userId && c.status === "PENDIENTE");
@@ -135,6 +138,16 @@ export default async function ContactosPage() {
                       <input type="hidden" name="otherId" value={other.id} />
                       <button type="submit" className="contact-card-msg-btn">✉️ Enviar mensaje</button>
                     </form>
+                    {starredIds.has(other.id) ? (
+                      <button type="button" disabled className="contact-card-star-btn given">
+                        ⭐ ¡Gracias enviado!
+                      </button>
+                    ) : (
+                      <form action={giveStar}>
+                        <input type="hidden" name="otherId" value={other.id} />
+                        <button type="submit" className="contact-card-star-btn">⭐ Agradecer</button>
+                      </form>
+                    )}
                   </div>
                 </div>
               );
