@@ -55,7 +55,9 @@ export default async function AdminPage() {
     recentBoardPosts,
   ] = await Promise.all([
     prisma.user.findMany({ where: { role: "MEMBER" }, include: { memberships: true }, orderBy: { createdAt: "desc" } }),
-    prisma.room.findMany({ orderBy: { createdAt: "asc" } }),
+    // Excluye las salas de mensajes directos (1:1) de la gestión de salas del admin;
+    // esas se crean automáticamente entre contactos y no son "salas" administrables.
+    prisma.room.findMany({ where: { type: { not: "DM" } }, orderBy: { createdAt: "asc" } }),
     prisma.paymentRequest.findMany({ where: { status: "PAID" }, orderBy: { createdAt: "asc" } }),
     prisma.event.findMany({ orderBy: { startsAt: "asc" }, include: { reservations: true } }),
     prisma.nomination.findMany({ where: { status: "PENDIENTE" }, include: { user: true }, orderBy: { createdAt: "asc" } }),
