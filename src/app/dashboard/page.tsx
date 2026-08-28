@@ -149,7 +149,15 @@ export default async function Dashboard() {
                 <div className="pulse-card spotlight-card">
                   <span className="eyebrow">Muza del mes</span>
                   <div className="spotlight-row">
-                    <div className="spotlight-avatar">{initials(activeSpotlight.user.name || activeSpotlight.user.username)}</div>
+                    {activeSpotlight.user.avatarUrl ? (
+                      <img
+                        src={activeSpotlight.user.avatarUrl}
+                        alt={activeSpotlight.user.name || activeSpotlight.user.username}
+                        className="spotlight-avatar"
+                      />
+                    ) : (
+                      <div className="spotlight-avatar">{initials(activeSpotlight.user.name || activeSpotlight.user.username)}</div>
+                    )}
                     <div>
                       <p className="spotlight-name">{activeSpotlight.user.name || activeSpotlight.user.username}</p>
                       {activeSpotlight.roleLabel && <p className="spotlight-role">{activeSpotlight.roleLabel}</p>}
