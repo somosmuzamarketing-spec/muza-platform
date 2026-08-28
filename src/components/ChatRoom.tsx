@@ -71,13 +71,16 @@ export default function ChatRoom({
   return (
     <div>
       <div className="chat-box" ref={boxRef}>
-        {messages.map((m) => (
-          <div key={m.id} className="msg">
-            <span className="author">{m.author}</span>
-            {m.content}
-            <span className="time">{new Date(m.createdAt).toLocaleTimeString()}</span>
-          </div>
-        ))}
+        {messages.map((m) => {
+          const mine = m.userId === currentUser.id;
+          return (
+            <div key={m.id} className={`msg ${mine ? "mine" : "theirs"}`}>
+              {!mine && <span className="author">{m.author}</span>}
+              {m.content}
+              <span className="time">{new Date(m.createdAt).toLocaleTimeString()}</span>
+            </div>
+          );
+        })}
       </div>
       <form onSubmit={sendMessage} style={{ display: "flex", gap: "0.5rem" }}>
         <input
