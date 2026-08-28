@@ -8,7 +8,7 @@ datasource db {
 }
 
 // role: "ADMIN" | "MEMBER"
-// type (Room): "CHAT" | "VIDEO"
+// type (Room): "CHAT" | "VIDEO" | "DM" (mensaje directo 1:1, creada automáticamente entre dos contactos)
 // status (PaymentRequest): "PENDING" | "PAID" | "APPROVED" | "REJECTED"
 // plan (User): "MIEMBRO" | "MUZA_PLUS"
 // status (Contact): "PENDIENTE" | "ACEPTADO"
