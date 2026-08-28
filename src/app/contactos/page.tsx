@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import TopNav from "@/components/TopNav";
+import ContactCardMenu from "@/components/ContactCardMenu";
 import { requestContact, respondContact, removeContact } from "./actions";
 
 function Avatar({
@@ -116,6 +117,7 @@ export default async function ContactosPage() {
               return (
                 <div key={c.id} className="contact-card">
                   <div className="contact-card-cover" />
+                  <ContactCardMenu contactRequestId={c.id} />
                   <div className="contact-card-body">
                     <Avatar
                       url={other.avatarUrl}
@@ -128,10 +130,6 @@ export default async function ContactosPage() {
                       <RoleBadges role={other.role} isMentor={other.isMentor} />
                     </div>
                     {other.title && <div className="contact-card-title">{other.title}</div>}
-                    <form action={removeContact}>
-                      <input type="hidden" name="contactRequestId" value={c.id} />
-                      <button type="submit" className="secondary" style={{ width: "100%" }}>Quitar</button>
-                    </form>
                   </div>
                 </div>
               );
