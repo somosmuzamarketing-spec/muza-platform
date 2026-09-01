@@ -22,11 +22,13 @@ import {
   deleteShoutout,
   closeBoardPost,
   deleteBoardPost,
+  recordManualPayment,
 } from "./actions";
 import CreateMemberForm from "@/components/CreateMemberForm";
 import ApproveRequestButton from "@/components/ApproveRequestButton";
 import EventBannerUpload from "@/components/EventBannerUpload";
 import ResetPasswordButton from "@/components/ResetPasswordButton";
+import { trialDaysLeft } from "@/lib/trial";
 
 function nominationTypeLabel(type: string) {
   if (type === "MENTORA") return "Mentora";
@@ -90,7 +92,13 @@ export default async function AdminPage() {
             {pendingRequests.map((r) => (
               <div key={r.id} style={{ borderTop: "1px solid var(--border)", paddingTop: "0.75rem", marginTop: "0.75rem" }}>
                 <p>
-                  {r.fullName} — {r.email}
+                  {r.fullName} {r.email && `— ${r.email}`}
+                  {r.method && (
+                    <span className="badge" style={{ marginLeft: "0.5rem" }}>
+                      {r.method === "BINANCE" ? "Binance" : "PayPal"}
+                      {r.paidAt && ` · ${new Date(r.paidAt).toLocaleDateString("es", { dateStyle: "medium" })}`}
+                    </span>
+                  )}
                   {r.referredByUsername && (
                     <span className="badge" style={{ marginLeft: "0.5rem" }}>Invitada por {r.referredByUsername}</span>
                   )}
@@ -163,9 +171,39 @@ export default async function AdminPage() {
         <div className="card">
           <h2>Crear miembro manualmente</h2>
           <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
-            Úsalo cuando confirmes un pago fuera de Stripe (transferencia, efectivo, etc.).
+            Úsalo para dar de alta a una candidata que pasó la entrevista. Por defecto arranca con su mes de
+            bienvenida (freemium); destildar la casilla solo si ya pagó desde el inicio.
           </p>
           <CreateMemberForm />
+        </div>
+
+        <div className="card">
+          <h2>Registrar pago (Binance / PayPal)</h2>
+          <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
+            Para una miembra que ya tiene cuenta (su mes de bienvenida). Queda en &quot;Pagos pendientes de
+            aprobar&quot; arriba; al aprobarla se activa su membresía y se cierra su periodo freemium.
+          </p>
+          <form action={recordManualPayment}>
+            <select name="userId" defaultValue="" required>
+              <option value="" disabled>Elige una miembra</option>
+              {members.map((m) => {
+                const daysLeft = trialDaysLeft(m);
+                return (
+                  <option key={m.id} value={m.id}>
+                    {m.name || m.username}
+                    {daysLeft !== null ? ` (freemium, ${daysLeft}d restantes)` : " (sin freemium activo)"}
+                  </option>
+                );
+              })}
+            </select>
+            <select name="method" defaultValue="" required>
+              <option value="" disabled>Método de pago</option>
+              <option value="BINANCE">Binance</option>
+              <option value="PAYPAL">PayPal</option>
+            </select>
+            <input name="paidAt" type="date" required />
+            <button type="submit">Registrar pago</button>
+          </form>
         </div>
 
         <div className="card">
@@ -400,12 +438,15 @@ export default async function AdminPage() {
                   </th>
                 ))}
                 <th>Plan</th>
+                <th>Freemium</th>
                 <th>Activo</th>
                 <th>Clave</th>
               </tr>
             </thead>
             <tbody>
-              {members.map((m) => (
+              {members.map((m) => {
+                const daysLeft = trialDaysLeft(m);
+                return (
                 <tr key={m.id}>
                   <td>
                     {m.name || m.username}
@@ -433,6 +474,13 @@ export default async function AdminPage() {
                     </form>
                   </td>
                   <td style={{ textAlign: "center" }}>
+                    {daysLeft !== null ? (
+                      <span className="badge gold">{daysLeft}d</span>
+                    ) : (
+                      <span style={{ color: "var(--muted)", fontSize: "0.8rem" }}>—</span>
+                    )}
+                  </td>
+                  <td style={{ textAlign: "center" }}>
                     <form action={toggleUserActive}>
                       <input type="hidden" name="userId" value={m.id} />
                       <button type="submit" className="secondary">{m.isActive ? "Desactivar" : "Activar"}</button>
@@ -442,7 +490,8 @@ export default async function AdminPage() {
                     <ResetPasswordButton userId={m.id} />
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

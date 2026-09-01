@@ -4,8 +4,11 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import TopNav from "@/components/TopNav";
 import ContactCardMenu from "@/components/ContactCardMenu";
+import UpsellTrigger from "@/components/UpsellModal";
+import { LOCK_ICON } from "@/components/icons";
 import { requestContact, respondContact, removeContact, giveStar } from "./actions";
 import { openConversation } from "@/app/mensajes/actions";
+import { hasActiveAccess, trialDaysLeft } from "@/lib/trial";
 
 function Avatar({
   url,
@@ -46,6 +49,59 @@ export default async function ContactosPage() {
 
   const me = await prisma.user.findUnique({ where: { id: userId } });
   const role = (session?.user as any)?.role;
+
+  if (me && !hasActiveAccess(me)) {
+    const daysLeft = trialDaysLeft(me);
+    const directory = await prisma.user.findMany({
+      where: { isActive: true, id: { not: userId } },
+      orderBy: { name: "asc" },
+      take: 100,
+    });
+
+    return (
+      <div>
+        <TopNav name={me.name || ""} avatarUrl={me.avatarUrl} role={role} plan={me.plan} isMentor={me.isMentor} />
+        <div className="container">
+          <span className="eyebrow">Comunidad</span>
+          <h1>Directorio de Muzas</h1>
+          <p style={{ color: "var(--muted)", marginTop: "-0.5rem" }}>
+            Esta es la red completa de Muzas. Durante tu mes de acceso puedes conocer quiénes son — conectar y
+            escribirles se activa con tu membresía.
+          </p>
+
+          <div className="contact-cards-grid">
+            {directory.map((u) => (
+              <div key={u.id} className="contact-card">
+                <div className="contact-card-cover">
+                  <div className="contact-card-lockbadge">{LOCK_ICON}</div>
+                </div>
+                <div className="contact-card-body">
+                  <Avatar
+                    url={u.avatarUrl}
+                    name={u.name || u.username}
+                    className="contact-card-avatar"
+                    initialsClassName="contact-card-avatar-initials"
+                  />
+                  <div className="contact-card-name">
+                    {u.name || u.username}
+                    <RoleBadges role={u.role} isMentor={u.isMentor} />
+                  </div>
+                  {u.title && <div className="contact-card-title">{u.title}</div>}
+                  <UpsellTrigger
+                    className="contact-card-btn"
+                    daysLeft={daysLeft}
+                    bodyText={`Conecta directamente con ${u.name || u.username} y el resto de la red de Muzas. Tu mes de acceso ya te dejó ver quién está aquí — conectar y escribirle es parte de la membresía completa.`}
+                  >
+                    {LOCK_ICON} Conectar
+                  </UpsellTrigger>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const [allContacts, everyone, starsGiven] = await Promise.all([
     prisma.contact.findMany({

@@ -2,6 +2,7 @@ import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "./prisma";
+import { enforceTrialExpiry } from "./trial";
 
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
@@ -21,7 +22,13 @@ export const authOptions: NextAuthOptions = {
         const user = await prisma.user.findUnique({
           where: { username: credentials.username },
         });
-        if (!user || !user.isActive) return null;
+        if (!user) return null;
+
+        // Chequeo perezoso: si su mes freemium venció sin pago confirmado,
+        // se desactiva justo ahora y se rechaza el login, igual que con
+        // cualquier otra cuenta desactivada.
+        const isActive = await enforceTrialExpiry(user);
+        if (!isActive) return null;
 
         const valid = await bcrypt.compare(credentials.password, user.passwordHash);
         if (!valid) return null;

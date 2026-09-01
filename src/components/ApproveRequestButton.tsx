@@ -23,6 +23,9 @@ export default function ApproveRequestButton({ id }: { id: string }) {
           <p>Clave: <code style={{ color: "#9ee6a8", background: "rgba(255,255,255,0.08)", padding: "0.1rem 0.4rem", borderRadius: "4px" }}>{state.password}</code></p>
         </div>
       )}
+      {state && !state.error && !state.username && (
+        <p style={{ color: "var(--purple)", fontWeight: 600 }}>✓ Pago aprobado. La cuenta ya tiene acceso completo.</p>
+      )}
     </div>
   );
 }

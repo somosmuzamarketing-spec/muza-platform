@@ -935,3 +935,89 @@ td { padding: 0.6rem; border-top: 1px solid var(--border); }
 .board-post:first-child { border-top: none; padding-top: 0; margin-top: 0; }
 .board-post-title { margin: 0 0 0.2rem; }
 .board-post-meta { color: var(--muted); font-size: 0.78rem; margin: 0 0 0.5rem; }
+
+/* ================= Freemium: candados, aviso de trial y modal de upsell ================= */
+
+/* QuickLinks bloqueados (Contactos, Sé mentora, Da un webinar) */
+.quicklink-card.locked { background: var(--cream-soft); opacity: 0.85; position: relative; text-align: left; width: 100%; }
+.quicklink-card.locked .quicklink-chip { background: var(--border); }
+.quicklink-card.locked .quicklink-chip svg { stroke: var(--muted); }
+.quicklink-lock {
+  position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(21, 12, 20, 0.5); display: flex; align-items: center; justify-content: center;
+}
+.quicklink-lock svg { width: 11px; height: 11px; stroke: var(--gold); fill: none; stroke-width: 2.2; }
+.quicklink-note { font-size: 0.72rem; color: var(--terracotta-ink); font-weight: 600; margin-top: 0.35rem; display: block; }
+
+/* Directorio de Muzas (Contactos bloqueado durante el mes freemium) */
+.contact-card-cover { position: relative; }
+.contact-card-lockbadge {
+  position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(21, 12, 20, 0.55); display: flex; align-items: center; justify-content: center;
+}
+.contact-card-lockbadge svg { width: 12px; height: 12px; stroke: var(--gold); fill: none; stroke-width: 2.2; }
+.contact-card-btn {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.35rem;
+  font-size: 0.78rem; font-weight: 600; padding: 0.5rem 0.6rem; margin-top: 0.3rem;
+  border-radius: 999px; border: 1.5px dashed var(--border); background: transparent; color: var(--muted);
+}
+.contact-card-btn:hover { border-color: var(--gold-dim); color: var(--terracotta-ink); opacity: 1; transform: none; }
+.contact-card-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+/* Aviso discreto de días restantes del mes freemium */
+.trial-note {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  background: var(--cream-soft); border: 1px solid var(--border); border-radius: 10px;
+  padding: 0.7rem 1.1rem; margin: 1.2rem 0; font-size: 0.85rem; color: var(--terracotta-ink); font-weight: 500;
+}
+.trial-note a { font-weight: 700; }
+
+/* Modal de upsell */
+.upsell-scrim {
+  position: fixed; inset: 0; background: rgba(21, 12, 20, 0.55); z-index: 100;
+  display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+}
+.upsell-modal {
+  width: 100%; max-width: 380px; background: var(--panel); border-radius: 16px;
+  padding: 2rem 2rem 1.7rem; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35);
+  text-align: center; position: relative;
+}
+.upsell-close {
+  position: absolute; top: 14px; right: 16px; background: none; border: none; padding: 0;
+  color: var(--muted); font-size: 1.1rem; cursor: pointer; line-height: 1;
+}
+.upsell-close:hover { opacity: 1; transform: none; color: var(--text); }
+.upsell-lock-badge {
+  width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 1.1rem;
+  background: linear-gradient(155deg, var(--plum-deep), var(--plum));
+  display: flex; align-items: center; justify-content: center; border: 2px solid var(--gold);
+}
+.upsell-lock-badge svg { width: 24px; height: 24px; stroke: var(--gold); fill: none; stroke-width: 2; }
+.upsell-modal .eyebrow { text-align: center; }
+.upsell-modal h2 { font-size: 1.4rem; margin-top: 0.4rem; }
+.upsell-body { color: var(--muted); font-size: 0.9rem; margin-top: 0.7rem; line-height: 1.55; }
+.upsell-trial-strip {
+  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+  margin-top: 1.1rem; font-size: 0.76rem; color: var(--terracotta-ink); font-weight: 600;
+}
+.upsell-trial-strip .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--terracotta-ink); }
+.upsell-cta { display: block; width: 100%; margin-top: 1.4rem; }
+.upsell-dismiss {
+  display: block; width: 100%; margin-top: 0.8rem; background: none; border: none;
+  color: var(--muted); font-size: 0.82rem; text-decoration: underline; cursor: pointer; font-weight: 500;
+}
+.upsell-dismiss:hover { opacity: 1; transform: none; color: var(--text); }
+
+/* ================= Chat de bienvenida embebido en el dashboard ================= */
+.chat-band { background: var(--cream-soft); border-bottom: 1px solid rgba(21, 12, 20, 0.08); }
+.chat-band .band-inner { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem; }
+.chat-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 1.4rem 1.4rem 1.5rem; }
+.chat-panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.7rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.chat-panel-head h4 { margin: 0; font-family: 'Gloock', Georgia, 'Times New Roman', serif; font-weight: 400; color: var(--plum); font-size: 1.05rem; }
+.chat-panel-head > span { font-size: 0.78rem; color: var(--muted); }
+.chat-box-mini {
+  height: 220px; overflow-y: auto; border: 1.5px solid var(--border); border-radius: 14px;
+  padding: 0.9rem; margin-bottom: 0.8rem; display: flex; flex-direction: column; gap: 0.5rem; background: var(--cream);
+}
+.chat-panel-foot { margin-top: 0.7rem; }
+.chat-panel-foot a { font-size: 0.82rem; font-weight: 600; }

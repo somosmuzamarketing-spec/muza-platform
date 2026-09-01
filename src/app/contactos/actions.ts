@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { hasActiveAccess } from "@/lib/trial";
 
 async function requireUserId() {
   const session = await getServerSession(authOptions);
@@ -11,8 +12,17 @@ async function requireUserId() {
   return userId;
 }
 
+// Contactos es una función bloqueada durante el mes freemium (ver src/lib/trial.ts).
+// La UI ya no ofrece estos botones en ese estado; esto es la segunda capa de
+// defensa por si alguien manda el formulario directamente.
+async function requireActiveAccess(userId: string) {
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { trialEndsAt: true } });
+  if (!user || !hasActiveAccess(user)) throw new Error("Conectar con otras muzas se activa con tu membresía.");
+}
+
 export async function requestContact(formData: FormData) {
   const requesterId = await requireUserId();
+  await requireActiveAccess(requesterId);
   const contactId = String(formData.get("contactId"));
   if (!contactId || contactId === requesterId) return;
 

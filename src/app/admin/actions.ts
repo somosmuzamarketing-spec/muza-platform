@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { revalidatePath } from "next/cache";
+import { trialEndDate } from "@/lib/trial";
+import { getWelcomeRoomId } from "@/lib/welcomeRoom";
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions);
@@ -26,19 +28,6 @@ function slugifyUsername(name: string) {
     .replace(/^\.|\.$/g, "");
   const suffix = Math.floor(100 + Math.random() * 900);
   return `${base || "miembro"}.${suffix}`;
-}
-
-async function getWelcomeRoomId() {
-  const room = await prisma.room.findFirst({ where: { name: "Bienvenida a Muza" } });
-  if (room) return room.id;
-  const created = await prisma.room.create({
-    data: {
-      name: "Bienvenida a Muza",
-      description: "Espacio de bienvenida para todas las muzas.",
-      type: "CHAT",
-    },
-  });
-  return created.id;
 }
 
 export type ActionResult = { username?: string; password?: string; error?: string } | null;
@@ -79,6 +68,10 @@ export async function createMember(_prev: ActionResult, formData: FormData): Pro
     const password = generatePassword();
     const passwordHash = await bcrypt.hash(password, 10);
 
+    // Toda candidata que pasa la entrevista recibe su mes de bienvenida
+    // (freemium) automáticamente, a la espera de confirmar el pago.
+    const isFreemium = formData.get("isFreemium") === "on";
+
     const user = await prisma.user.create({
       data: {
         username,
@@ -89,6 +82,7 @@ export async function createMember(_prev: ActionResult, formData: FormData): Pro
         title,
         bio,
         avatarUrl: avatarUrl || undefined,
+        trialEndsAt: isFreemium ? trialEndDate() : null,
       },
     });
 
@@ -161,6 +155,22 @@ export async function approvePaymentRequest(_prev: ActionResult, formData: FormD
     const request = await prisma.paymentRequest.findUnique({ where: { id } });
     if (!request) throw new Error("Solicitud no encontrada.");
 
+    // Pago manual (Binance/PayPal) de una miembra que ya tiene cuenta creada
+    // con su mes freemium: se confirma su pago sobre esa cuenta existente,
+    // en vez de crear una nueva (eso solo aplica al flujo histórico de Stripe).
+    if (request.userId) {
+      await prisma.user.update({
+        where: { id: request.userId },
+        data: { trialEndsAt: null, isActive: true },
+      });
+      await prisma.paymentRequest.update({
+        where: { id },
+        data: { status: "APPROVED", approvedAt: new Date() },
+      });
+      revalidatePath("/admin");
+      return {};
+    }
+
     const username = slugifyUsername(request.fullName);
     const password = generatePassword();
     const passwordHash = await bcrypt.hash(password, 10);
@@ -188,6 +198,37 @@ export async function approvePaymentRequest(_prev: ActionResult, formData: FormD
   } catch (e: any) {
     return { error: e.message || "Error aprobando la solicitud." };
   }
+}
+
+// --- Pagos manuales de Binance/PayPal (freemium) ---
+// Registra el pago de una miembra que ya tiene cuenta (creada con su mes de
+// bienvenida). Queda como solicitud "PAID" pendiente de aprobar, reutilizando
+// la misma lista y el mismo botón de aprobación que ya usa el flujo de Stripe.
+export async function recordManualPayment(formData: FormData) {
+  await requireAdmin();
+  const userId = String(formData.get("userId") || "").trim();
+  const method = String(formData.get("method") || "").trim();
+  const paidAtRaw = String(formData.get("paidAt") || "").trim();
+
+  if (!userId || (method !== "BINANCE" && method !== "PAYPAL")) {
+    throw new Error("Elige la miembra y el método de pago (Binance o PayPal).");
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new Error("Miembra no encontrada.");
+
+  await prisma.paymentRequest.create({
+    data: {
+      fullName: user.name || user.username,
+      email: user.email || "",
+      status: "PAID",
+      userId: user.id,
+      method,
+      paidAt: paidAtRaw ? new Date(paidAtRaw) : new Date(),
+    },
+  });
+
+  revalidatePath("/admin");
 }
 
 export async function toggleUserActive(formData: FormData) {

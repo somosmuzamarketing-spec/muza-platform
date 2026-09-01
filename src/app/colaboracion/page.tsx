@@ -4,7 +4,10 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import TopNav from "@/components/TopNav";
 import BoardPostForm from "@/components/BoardPostForm";
+import UpsellTrigger from "@/components/UpsellModal";
+import { LOCK_ICON } from "@/components/icons";
 import { createCollaborationPost } from "./actions";
+import { hasActiveAccess, trialDaysLeft } from "@/lib/trial";
 
 export default async function ColaboracionPage() {
   const session = await getServerSession(authOptions);
@@ -21,6 +24,7 @@ export default async function ColaboracionPage() {
   ]);
 
   const name = user?.name || session?.user?.name || "";
+  const locked = !user || !hasActiveAccess(user);
 
   return (
     <div>
@@ -34,13 +38,26 @@ export default async function ColaboracionPage() {
 
         <div className="card">
           <h3>Publicar una búsqueda</h3>
-          <BoardPostForm
-            action={createCollaborationPost}
-            titlePlaceholder="¿Qué colaboración buscas?"
-            descriptionPlaceholder="Describe el proyecto y qué tipo de colaboradora necesitas"
-            categoryPlaceholder="Área (opcional): diseño, marketing, finanzas..."
-            submitLabel="Publicar"
-          />
+          {locked ? (
+            <>
+              <p style={{ color: "var(--muted)" }}>Publicar tu búsqueda se activa con tu membresía.</p>
+              <UpsellTrigger
+                className="btn gold"
+                daysLeft={user ? trialDaysLeft(user) : null}
+                bodyText="Publicar tu búsqueda de colaboradora y que la comunidad te responda es parte de la membresía completa."
+              >
+                {LOCK_ICON} Publicar
+              </UpsellTrigger>
+            </>
+          ) : (
+            <BoardPostForm
+              action={createCollaborationPost}
+              titlePlaceholder="¿Qué colaboración buscas?"
+              descriptionPlaceholder="Describe el proyecto y qué tipo de colaboradora necesitas"
+              categoryPlaceholder="Área (opcional): diseño, marketing, finanzas..."
+              submitLabel="Publicar"
+            />
+          )}
         </div>
 
         <div className="card">

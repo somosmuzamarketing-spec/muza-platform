@@ -4,7 +4,10 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import TopNav from "@/components/TopNav";
 import BoardPostForm from "@/components/BoardPostForm";
+import UpsellTrigger from "@/components/UpsellModal";
+import { LOCK_ICON } from "@/components/icons";
 import { createOpportunityPost } from "./actions";
+import { hasActiveAccess, trialDaysLeft } from "@/lib/trial";
 
 export default async function OportunidadesPage() {
   const session = await getServerSession(authOptions);
@@ -21,6 +24,7 @@ export default async function OportunidadesPage() {
   ]);
 
   const name = user?.name || session?.user?.name || "";
+  const locked = !user || !hasActiveAccess(user);
 
   return (
     <div>
@@ -34,13 +38,26 @@ export default async function OportunidadesPage() {
 
         <div className="card">
           <h3>Publicar una oportunidad</h3>
-          <BoardPostForm
-            action={createOpportunityPost}
-            titlePlaceholder="Título de la oportunidad"
-            descriptionPlaceholder="Describe la oportunidad: qué es, para quién, cómo aplicar"
-            categoryPlaceholder="Tipo (opcional): trabajo, freelance, beca, cliente..."
-            submitLabel="Publicar"
-          />
+          {locked ? (
+            <>
+              <p style={{ color: "var(--muted)" }}>Publicar una oportunidad se activa con tu membresía.</p>
+              <UpsellTrigger
+                className="btn gold"
+                daysLeft={user ? trialDaysLeft(user) : null}
+                bodyText="Publicar en la Bolsa de oportunidades y que la comunidad te responda es parte de la membresía completa."
+              >
+                {LOCK_ICON} Publicar
+              </UpsellTrigger>
+            </>
+          ) : (
+            <BoardPostForm
+              action={createOpportunityPost}
+              titlePlaceholder="Título de la oportunidad"
+              descriptionPlaceholder="Describe la oportunidad: qué es, para quién, cómo aplicar"
+              categoryPlaceholder="Tipo (opcional): trabajo, freelance, beca, cliente..."
+              submitLabel="Publicar"
+            />
+          )}
         </div>
 
         <div className="card">
