@@ -1,8 +1,12 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import UpsellTrigger from "./UpsellModal";
+import { LOCK_ICON } from "./icons";
 
 type Props = {
   isMentor?: boolean;
+  locked?: boolean;
+  daysLeft?: number | null;
 };
 
 type LinkItem = {
@@ -12,6 +16,11 @@ type LinkItem = {
   icon: ReactNode;
   badge?: string;
   featured?: boolean;
+  // Se atenúa con candado y, al hacer clic, abre el modal de upsell en vez de navegar.
+  locked?: boolean;
+  // Deja navegar (ver contenido abierto) pero avisa que la acción real requiere membresía.
+  note?: string;
+  upsellBody?: string;
 };
 
 const icons = {
@@ -92,14 +101,24 @@ const icons = {
   ),
 };
 
-export default function QuickLinks({ isMentor }: Props) {
+export default function QuickLinks({ isMentor, locked, daysLeft }: Props) {
   const groups: { title: string; desc: string; badge?: string; links: LinkItem[] }[] = [
     {
       title: "Tu espacio",
       desc: "perfil, red y agenda",
       links: [
         { href: "/perfil", icon: icons.profile, label: "Mi perfil", desc: "Foto, bio y datos" },
-        { href: "/contactos", icon: icons.contacts, label: "Contactos", desc: "Conecta con otras muzas" },
+        { href: "/chats", icon: icons.chatsAbiertos, label: "Chats abiertos", desc: "Únete a una sala de la comunidad" },
+        {
+          href: "/contactos",
+          icon: icons.contacts,
+          label: "Contactos",
+          desc: "Conecta con otras muzas",
+          locked,
+          note: locked ? "Con tu membresía" : undefined,
+          upsellBody:
+            "Conecta directamente con el resto de la red de Muzas. Tu mes de acceso ya te dejó ver quién está aquí — conectar y escribirle es parte de la membresía completa.",
+        },
         { href: "/eventos", icon: icons.events, label: "Eventos", desc: "Reserva tu lugar" },
       ],
     },
@@ -108,8 +127,20 @@ export default function QuickLinks({ isMentor }: Props) {
       desc: "encuentra a tu gente y proyectos",
       badge: "Nuevo",
       links: [
-        { href: "/colaboracion", icon: icons.collaborate, label: "Busco colaboradora", desc: "Publica lo que necesitas para tu proyecto" },
-        { href: "/oportunidades", icon: icons.briefcase, label: "Bolsa de oportunidades", desc: "Trabajos y proyectos que comparte la comunidad" },
+        {
+          href: "/colaboracion",
+          icon: icons.collaborate,
+          label: "Busco colaboradora",
+          desc: "Publica lo que necesitas para tu proyecto",
+          note: locked ? "Ver publicaciones es libre; publicar, con tu membresía" : undefined,
+        },
+        {
+          href: "/oportunidades",
+          icon: icons.briefcase,
+          label: "Bolsa de oportunidades",
+          desc: "Trabajos y proyectos que comparte la comunidad",
+          note: locked ? "Ver publicaciones es libre; publicar, con tu membresía" : undefined,
+        },
       ],
     },
     {
@@ -119,8 +150,28 @@ export default function QuickLinks({ isMentor }: Props) {
         { href: "/nominar-muza", icon: icons.star, label: "Nominar a una Muza", desc: "Recomienda a alguien especial" },
         isMentor
           ? { href: "/nominar-mentora", icon: icons.mentorGrowth, label: "Ya eres mentora", desc: "Gracias por guiar a la comunidad" }
-          : { href: "/nominar-mentora", icon: icons.mentorGrowth, label: "Sé mentora", desc: "Postúlate como Muza Mentora", badge: "Abierto", featured: true },
-        { href: "/nominar-webinar", icon: icons.webinar, label: "Da un webinar", desc: "Comparte tu conocimiento" },
+          : {
+              href: "/nominar-mentora",
+              icon: icons.mentorGrowth,
+              label: "Sé mentora",
+              desc: "Postúlate como Muza Mentora",
+              badge: locked ? undefined : "Abierto",
+              featured: !locked,
+              locked,
+              note: locked ? "Con tu membresía" : undefined,
+              upsellBody:
+                "Postularte como Muza Mentora y guiar a otras miembros es parte de la membresía completa. Tu mes de acceso ya te dejó conocer la comunidad — el siguiente paso es activarla.",
+            },
+        {
+          href: "/nominar-webinar",
+          icon: icons.webinar,
+          label: "Da un webinar",
+          desc: "Comparte tu conocimiento",
+          locked,
+          note: locked ? "Con tu membresía" : undefined,
+          upsellBody:
+            "Dar un webinar para toda la comunidad Muza es parte de la membresía completa. Actívala para postularte.",
+        },
         { href: "/escribir-articulo", icon: icons.article, label: "Escribir un artículo", desc: "Comparte para el blog" },
       ],
     },
@@ -129,7 +180,6 @@ export default function QuickLinks({ isMentor }: Props) {
       desc: "chats y soporte",
       links: [
         { href: "/crear-chat", icon: icons.createChat, label: "Crear un chat", desc: "Propón un tema para la comunidad" },
-        { href: "/chats", icon: icons.chatsAbiertos, label: "Chats abiertos", desc: "Únete a un chat" },
         { href: "/soporte", icon: icons.support, label: "Soporte", desc: "Escríbele a Muza" },
       ],
     },
@@ -147,22 +197,40 @@ export default function QuickLinks({ isMentor }: Props) {
             <span>— {g.desc}</span>
           </div>
           <div className="quicklinks-grid">
-            {g.links.map((l) => (
-              <Link
-                key={l.href + l.label}
-                href={l.href}
-                className={`quicklink-card${l.featured ? " featured" : ""}`}
-              >
-                <span className="quicklink-chip">{l.icon}</span>
-                <span className="quicklink-text">
-                  <span className="quicklink-label">
-                    {l.label}
-                    {l.badge && <span className="badge badge-new">{l.badge}</span>}
+            {g.links.map((l) =>
+              l.locked ? (
+                <UpsellTrigger
+                  key={l.href + l.label}
+                  className="quicklink-card locked"
+                  daysLeft={daysLeft ?? null}
+                  bodyText={l.upsellBody}
+                >
+                  <span className="quicklink-lock">{LOCK_ICON}</span>
+                  <span className="quicklink-chip">{l.icon}</span>
+                  <span className="quicklink-text">
+                    <span className="quicklink-label">{l.label}</span>
+                    <span className="quicklink-desc">{l.desc}</span>
+                    {l.note && <span className="quicklink-note">{l.note}</span>}
                   </span>
-                  <span className="quicklink-desc">{l.desc}</span>
-                </span>
-              </Link>
-            ))}
+                </UpsellTrigger>
+              ) : (
+                <Link
+                  key={l.href + l.label}
+                  href={l.href}
+                  className={`quicklink-card${l.featured ? " featured" : ""}`}
+                >
+                  <span className="quicklink-chip">{l.icon}</span>
+                  <span className="quicklink-text">
+                    <span className="quicklink-label">
+                      {l.label}
+                      {l.badge && <span className="badge badge-new">{l.badge}</span>}
+                    </span>
+                    <span className="quicklink-desc">{l.desc}</span>
+                    {l.note && <span className="quicklink-note">{l.note}</span>}
+                  </span>
+                </Link>
+              )
+            )}
           </div>
         </div>
       ))}

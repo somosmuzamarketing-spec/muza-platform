@@ -7,7 +7,10 @@ import QuickLinks from "@/components/QuickLinks";
 import ReferralBox from "@/components/ReferralBox";
 import PollWidget from "@/components/PollWidget";
 import ChallengeWidget from "@/components/ChallengeWidget";
+import ChatRoom from "@/components/ChatRoom";
 import { joinConversatorio } from "@/app/eventos/actions";
+import { getWelcomeRoomId } from "@/lib/welcomeRoom";
+import { hasActiveAccess, trialDaysLeft } from "@/lib/trial";
 
 export default async function Dashboard() {
   const session = await getServerSession(authOptions);
@@ -68,6 +71,24 @@ export default async function Dashboard() {
   const name = user?.name || sessionName;
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
   const referralLink = user?.username && baseUrl ? `${baseUrl}/registro?ref=${user.username}` : "";
+
+  const trialInfo = { trialEndsAt: user?.trialEndsAt ?? null };
+  const locked = !hasActiveAccess(trialInfo);
+  const daysLeft = trialDaysLeft(trialInfo);
+
+  // El chat de bienvenida vive embebido en el dashboard (ver más abajo), así
+  // que se saca de la grilla "Tus salas" para no duplicarlo.
+  const welcomeRoomId = await getWelcomeRoomId();
+  const hasWelcomeAccess = rooms.some((r) => r.id === welcomeRoomId);
+  const welcomeMessages = hasWelcomeAccess
+    ? await prisma.message.findMany({
+        where: { roomId: welcomeRoomId },
+        include: { user: true },
+        orderBy: { createdAt: "asc" },
+        take: 50,
+      })
+    : [];
+  const otherRooms = rooms.filter((r) => r.id !== welcomeRoomId);
 
   const spotsLeft =
     nextEvent && nextEvent.capacity != null ? Math.max(nextEvent.capacity - nextEvent.reservations.length, 0) : null;
@@ -225,6 +246,37 @@ export default async function Dashboard() {
         </div>
       )}
 
+      {hasWelcomeAccess && (
+        <div className="chat-band">
+          <div className="band-inner">
+            <div className="chat-panel">
+              <div className="chat-panel-head">
+                <div>
+                  <span className="eyebrow" style={{ marginBottom: "0.4rem" }}>Comunidad</span>
+                  <h4>💬 Chat de bienvenida</h4>
+                </div>
+                <span>conversa con toda la comunidad, ahora mismo</span>
+              </div>
+              <ChatRoom
+                roomId={welcomeRoomId}
+                currentUser={{ id: userId, name: session?.user?.name || "" }}
+                initialMessages={welcomeMessages.map((m) => ({
+                  id: m.id,
+                  content: m.content,
+                  createdAt: m.createdAt.toISOString(),
+                  author: m.user.name || m.user.username,
+                  userId: m.userId,
+                }))}
+                compact
+              />
+              <div className="chat-panel-foot">
+                <Link href={`/rooms/${welcomeRoomId}`}>Ver la conversación completa →</Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {feedItems.length > 0 && (
         <div className="celebremos-band">
           <div className="band-inner">
@@ -251,7 +303,16 @@ export default async function Dashboard() {
       )}
 
       <div className="container">
-        <QuickLinks isMentor={user?.isMentor} />
+        {locked && daysLeft !== null && (
+          <div className="trial-note">
+            <span>
+              Te quedan {daysLeft} día{daysLeft === 1 ? "" : "s"} de tu mes en Muza.
+            </span>
+            <Link href="/soporte">Activar mi membresía →</Link>
+          </div>
+        )}
+
+        <QuickLinks isMentor={user?.isMentor} locked={locked} daysLeft={daysLeft} />
 
         {nextConversatorio && (
           <div className="card event-teaser">
@@ -350,9 +411,9 @@ export default async function Dashboard() {
 
         <h3 style={{ marginTop: "2rem" }}>Tus salas</h3>
         <p style={{ color: "var(--muted)", marginTop: "-0.5rem" }}>Chats y videollamadas disponibles para ti.</p>
-        {rooms.length === 0 && <p style={{ color: "var(--muted)" }}>Todavía no tienes salas asignadas.</p>}
+        {otherRooms.length === 0 && <p style={{ color: "var(--muted)" }}>Todavía no tienes otras salas asignadas.</p>}
         <div className="room-grid">
-          {rooms.map((room) => (
+          {otherRooms.map((room) => (
             <Link
               key={room.id}
               href={room.type === "CHAT" ? `/rooms/${room.id}` : `/video/${room.id}`}

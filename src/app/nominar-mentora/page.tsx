@@ -4,7 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import TopNav from "@/components/TopNav";
 import NominationForm from "@/components/NominationForm";
+import UpsellTrigger from "@/components/UpsellModal";
+import { LOCK_ICON } from "@/components/icons";
 import { nominateMentora } from "./actions";
+import { hasActiveAccess, trialDaysLeft } from "@/lib/trial";
 
 export default async function NominarMentoraPage() {
   const session = await getServerSession(authOptions);
@@ -13,6 +16,7 @@ export default async function NominarMentoraPage() {
 
   const me = await prisma.user.findUnique({ where: { id: userId } });
   const role = (session?.user as any)?.role;
+  const locked = !me || !hasActiveAccess(me);
 
   return (
     <div>
@@ -25,7 +29,21 @@ export default async function NominarMentoraPage() {
           Cuéntanos sobre ti y nuestro equipo revisará tu postulación.
         </p>
 
-        {me?.isMentor ? (
+        {locked ? (
+          <div className="card" style={{ textAlign: "center" }}>
+            <p style={{ color: "var(--muted)" }}>
+              Postularte como Muza Mentora es parte de la membresía completa. Tu mes de acceso ya te dejó conocer
+              la comunidad — el siguiente paso es activarla.
+            </p>
+            <UpsellTrigger
+              className="btn gold"
+              daysLeft={me ? trialDaysLeft(me) : null}
+              bodyText="Postularte como Muza Mentora y guiar a otras miembros es parte de la membresía completa. Tu mes de acceso ya te dejó conocer la comunidad — el siguiente paso es activarla."
+            >
+              {LOCK_ICON} Sé mentora
+            </UpsellTrigger>
+          </div>
+        ) : me?.isMentor ? (
           <div className="card">
             <p style={{ color: "var(--purple)", fontWeight: 600 }}>✓ Ya eres Muza Mentora. Gracias por guiar a la comunidad.</p>
           </div>

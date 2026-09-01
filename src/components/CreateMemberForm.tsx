@@ -93,6 +93,11 @@ export default function CreateMemberForm() {
         <label style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Su mayor orgullo</label>
         <textarea name="bioOrgullo" rows={2} placeholder="De qué se siente orgullosa" />
 
+        <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.9rem" }}>
+          <input name="isFreemium" type="checkbox" defaultChecked style={{ width: "auto", marginBottom: 0 }} />
+          Mes de bienvenida (freemium) — acceso completo por 30 días, sin pago confirmado
+        </label>
+
         <SubmitButton />
       </form>
       {state?.error && <p style={{ color: "#f87171" }}>{state.error}</p>}

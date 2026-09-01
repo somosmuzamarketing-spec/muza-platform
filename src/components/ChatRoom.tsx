@@ -14,10 +14,15 @@ export default function ChatRoom({
   roomId,
   currentUser,
   initialMessages,
+  compact,
 }: {
   roomId: string;
   currentUser: { id: string; name: string };
   initialMessages: Msg[];
+  // Vista reducida para embeber en el dashboard: caja de chat más chica y
+  // solo los últimos mensajes. El envío y la recepción en tiempo real son
+  // exactamente los mismos que en la sala completa.
+  compact?: boolean;
 }) {
   const [messages, setMessages] = useState<Msg[]>(initialMessages);
   const [text, setText] = useState("");
@@ -68,10 +73,12 @@ export default function ChatRoom({
     }
   }
 
+  const displayedMessages = compact ? messages.slice(-6) : messages;
+
   return (
     <div>
-      <div className="chat-box" ref={boxRef}>
-        {messages.map((m) => {
+      <div className={compact ? "chat-box-mini" : "chat-box"} ref={boxRef}>
+        {displayedMessages.map((m) => {
           const mine = m.userId === currentUser.id;
           return (
             <div key={m.id} className={`msg ${mine ? "mine" : "theirs"}`}>

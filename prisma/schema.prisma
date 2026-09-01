@@ -40,6 +40,12 @@ model User {
   isActive     Boolean      @default(true)
   createdAt    DateTime     @default(now())
 
+  // --- Freemium: mes de bienvenida sin pago confirmado ---
+  // Nulo para miembras pagas normales. Se llena solo al crear una cuenta
+  // freemium nueva (hoy + 30 días). Se limpia al aprobarse su pago.
+  trialEndsAt  DateTime?
+  paymentRequests PaymentRequest[]
+
   memberships       Membership[]
   messages          Message[]
   reservations      EventReservation[]
@@ -101,6 +107,14 @@ model PaymentRequest {
   approvedAt          DateTime?
   generatedUsername   String?
   referredByUsername  String?   // usuario que la invitó (programa de referidos)
+
+  // --- Pago manual (Binance/PayPal) de una miembra que ya tiene cuenta ---
+  // creada a mano con su mes freemium. userId no nulo distingue este flujo
+  // del histórico basado en Stripe (que sigue creando la cuenta al aprobar).
+  userId              String?
+  method              String?   // BINANCE | PAYPAL
+  paidAt              DateTime?
+  user                User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // --- Directorio de contactos entre miembros ---
