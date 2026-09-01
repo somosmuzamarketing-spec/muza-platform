@@ -78,9 +78,9 @@ export default async function AdminPage() {
   return (
     <div>
       <header className="navbar">
-        <a href="https://somosmuza.com" className="logo">
+        <Link href="/dashboard" className="logo">
           <img src="/logo-horizontal.png" alt="Muza" className="logo-img" />
-        </a>
+        </Link>
         <Link href="/dashboard">&larr; Volver</Link>
       </header>
       <div className="container">

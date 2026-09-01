@@ -34,11 +34,12 @@ export default async function TopNav({ name, avatarUrl, role, plan, isMentor }: 
 
   return (
     <header className="navbar">
-      <a href="https://somosmuza.com" className="logo">
+      <Link href="/dashboard" className="logo">
         <img src="/logo-horizontal.png" alt="Muza" className="logo-img" />
-      </a>
+      </Link>
 
       <div className="navlinks">
+        <Link href="/dashboard">Inicio</Link>
         <Link href="/contactos">
           Contactos
           {pendingContactsCount > 0 && (
