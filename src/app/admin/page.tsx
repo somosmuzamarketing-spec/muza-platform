@@ -44,6 +44,7 @@ export default async function AdminPage() {
   if ((session?.user as any)?.role !== "ADMIN") redirect("/dashboard");
 
   const [
+    teamAccounts,
     members,
     rooms,
     pendingRequests,
@@ -56,6 +57,7 @@ export default async function AdminPage() {
     recentShoutouts,
     recentBoardPosts,
   ] = await Promise.all([
+    prisma.user.findMany({ where: { role: { in: ["FOUNDER", "COFOUNDER", "ADMIN"] } }, orderBy: { createdAt: "asc" } }),
     prisma.user.findMany({ where: { role: "MEMBER" }, include: { memberships: true }, orderBy: { createdAt: "desc" } }),
     // Excluye las salas de mensajes directos (1:1) de la gestión de salas del admin;
     // esas se crean automáticamente entre contactos y no son "salas" administrables.
@@ -425,6 +427,33 @@ export default async function AdminPage() {
             ))}
           </div>
         )}
+
+        <div className="card">
+          <h2>Cuentas del equipo (Fundadoras / Admin)</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Rol</th>
+                <th>Clave</th>
+              </tr>
+            </thead>
+            <tbody>
+              {teamAccounts.map((t) => (
+                <tr key={t.id}>
+                  <td>
+                    {t.name || t.username}
+                    <br /><span style={{ color: "var(--muted)", fontSize: "0.8rem" }}>{t.username}</span>
+                  </td>
+                  <td>{t.role}</td>
+                  <td>
+                    <ResetPasswordButton userId={t.id} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
         <div className="card">
           <h2>Miembros y acceso a salas</h2>
