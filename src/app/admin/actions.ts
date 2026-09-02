@@ -3,20 +3,16 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
 import { revalidatePath } from "next/cache";
 import { trialEndDate } from "@/lib/trial";
 import { getWelcomeRoomId } from "@/lib/welcomeRoom";
+import { generatePassword } from "@/lib/password";
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions);
   if ((session?.user as any)?.role !== "ADMIN") {
     throw new Error("Solo un administrador puede hacer esto.");
   }
-}
-
-function generatePassword(length = 10) {
-  return crypto.randomBytes(length).toString("base64url").slice(0, length);
 }
 
 function slugifyUsername(name: string) {
