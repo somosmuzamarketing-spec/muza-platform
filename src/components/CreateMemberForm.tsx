@@ -81,7 +81,7 @@ export default function CreateMemberForm() {
 
         <input name="name" placeholder="Nombre completo" required />
         <input name="email" placeholder="Email (opcional)" type="email" />
-        <input name="username" placeholder="Usuario (opcional, se genera si lo dejas vacío)" />
+        <input name="username" placeholder="Usuario (opcional, se usa el email si lo dejas vacío; si no hay email, se genera uno)" />
         <input name="title" placeholder='Título o rol (ej. "Empresaria, Gerente General de...")' />
 
         <label style={{ fontSize: "0.85rem", color: "var(--muted)" }}>A qué se dedica</label>
