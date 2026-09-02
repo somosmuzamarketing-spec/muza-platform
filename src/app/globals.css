@@ -660,6 +660,7 @@ input::placeholder, textarea::placeholder { color: var(--muted); }
   height: 44px;
   border-radius: 50%;
   object-fit: cover;
+  object-position: top center;
   border: 2px solid #fff;
   display: block;
   margin: 0 auto 0.4rem;
