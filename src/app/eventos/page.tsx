@@ -3,10 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import TopNav from "@/components/TopNav";
-import UpsellTrigger from "@/components/UpsellModal";
-import { LOCK_ICON } from "@/components/icons";
 import { reserveSpot, cancelReservation } from "./actions";
-import { hasActiveAccess, trialDaysLeft } from "@/lib/trial";
 
 const TYPE_ICON: Record<string, string> = {
   EVENTO: "🌸",
@@ -23,8 +20,6 @@ export default async function EventosPage() {
 
   const me = await prisma.user.findUnique({ where: { id: userId } });
   const role = (session?.user as any)?.role;
-  const locked = !me || !hasActiveAccess(me);
-  const daysLeft = me ? trialDaysLeft(me) : null;
 
   const events = await prisma.event.findMany({
     where: { startsAt: { gte: new Date(Date.now() - 1000 * 60 * 60 * 6) } },
@@ -83,23 +78,11 @@ export default async function EventosPage() {
                       </form>
                     </div>
                   </>
-                ) : isFull ? (
-                  <button type="button" disabled style={{ width: "100%" }}>
-                    Cupo lleno
-                  </button>
-                ) : locked ? (
-                  <UpsellTrigger
-                    className="btn gold"
-                    daysLeft={daysLeft}
-                    bodyText="Reservar tu cupo en talleres, webinars y encuentros de la comunidad es parte de la membresía completa. Tu mes de acceso ya te deja ver el calendario — el siguiente paso es activarla."
-                  >
-                    {LOCK_ICON} Reservar mi lugar
-                  </UpsellTrigger>
                 ) : (
                   <form action={reserveSpot}>
                     <input type="hidden" name="eventId" value={event.id} />
-                    <button type="submit" style={{ width: "100%" }}>
-                      Reservar mi lugar
+                    <button type="submit" disabled={isFull} style={{ width: "100%" }}>
+                      {isFull ? "Cupo lleno" : "Reservar mi lugar"}
                     </button>
                   </form>
                 )}
