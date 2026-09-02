@@ -60,7 +60,7 @@ export async function createMember(_prev: ActionResult, formData: FormData): Pro
         .map(([label, text]) => `[[${label}]]\n${text}`)
         .join("\n\n") || undefined;
 
-    if (!username) username = slugifyUsername(name || email || "miembro");
+    if (!username) username = email || slugifyUsername(name || "miembro");
     const password = generatePassword();
     const passwordHash = await bcrypt.hash(password, 10);
 
