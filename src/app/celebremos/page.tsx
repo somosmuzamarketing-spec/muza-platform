@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import TopNav from "@/components/TopNav";
 import ShoutoutForm from "@/components/ShoutoutForm";
+import { REACTION_EMOJIS, toggleReaction } from "./actions";
 
 function initials(label: string) {
   return (label || "M")
@@ -21,7 +22,10 @@ export default async function CelebremosPage() {
 
   const [user, shoutouts, birthdayCandidates] = await Promise.all([
     prisma.user.findUnique({ where: { id: userId } }),
-    prisma.shoutout.findMany({ include: { user: true }, orderBy: { createdAt: "desc" } }),
+    prisma.shoutout.findMany({
+      include: { user: true, reactions: true },
+      orderBy: { createdAt: "desc" },
+    }),
     prisma.user.findMany({ where: { birthDate: { not: null }, isActive: true } }),
   ]);
 
@@ -69,17 +73,44 @@ export default async function CelebremosPage() {
           {shoutouts.length === 0 && (
             <p style={{ color: "var(--muted)" }}>Todavía no hay publicaciones. ¡Sé la primera en compartir algo!</p>
           )}
-          {shoutouts.map((s) => (
-            <div key={s.id} className="board-post">
-              <p className="board-post-title">
-                <strong>{s.user.name || s.user.username}</strong>
-              </p>
-              <p className="board-post-meta">
-                {new Date(s.createdAt).toLocaleDateString("es", { dateStyle: "long" })}
-              </p>
-              <p style={{ margin: 0 }}>{s.message}</p>
-            </div>
-          ))}
+          {shoutouts.map((s) => {
+            const counts: Record<string, number> = {};
+            const mine = new Set<string>();
+            for (const r of s.reactions) {
+              counts[r.emoji] = (counts[r.emoji] || 0) + 1;
+              if (r.userId === userId) mine.add(r.emoji);
+            }
+
+            return (
+              <div key={s.id} className="board-post">
+                <p className="board-post-title">
+                  <strong>{s.user.name || s.user.username}</strong>
+                </p>
+                <p className="board-post-meta">
+                  {new Date(s.createdAt).toLocaleDateString("es", { dateStyle: "long" })}
+                </p>
+                <p style={{ margin: 0 }}>{s.message}</p>
+
+                <div className="reaction-row">
+                  {REACTION_EMOJIS.map((emoji) => (
+                    <form action={toggleReaction} key={emoji}>
+                      <input type="hidden" name="shoutoutId" value={s.id} />
+                      <input type="hidden" name="emoji" value={emoji} />
+                      <button
+                        type="submit"
+                        className={`reaction-btn${mine.has(emoji) ? " active" : ""}`}
+                        aria-pressed={mine.has(emoji)}
+                        title={mine.has(emoji) ? "Quitar reacción" : "Reaccionar"}
+                      >
+                        <span>{emoji}</span>
+                        {counts[emoji] ? <span className="reaction-count">{counts[emoji]}</span> : null}
+                      </button>
+                    </form>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         <p className="footer-note">
