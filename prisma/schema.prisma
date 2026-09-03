@@ -39,6 +39,7 @@ model User {
   role         String       @default("MEMBER")
   isActive     Boolean      @default(true)
   createdAt    DateTime     @default(now())
+  lastLoginAt  DateTime?
 
   // --- Freemium: mes de bienvenida sin pago confirmado ---
   // Nulo para miembras pagas normales. Se llena solo al crear una cuenta
