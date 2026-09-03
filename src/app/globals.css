@@ -937,6 +937,22 @@ td { padding: 0.6rem; border-top: 1px solid var(--border); }
 .board-post-title { margin: 0 0 0.2rem; }
 .board-post-meta { color: var(--muted); font-size: 0.78rem; margin: 0 0 0.5rem; }
 
+/* --- Reacciones con emoji (Celebremos) --- */
+.reaction-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.7rem; }
+.reaction-btn {
+  background: var(--cream-soft);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  gap: 0.3rem;
+}
+.reaction-btn:hover { opacity: 1; background: var(--panel); border-color: var(--purple); transform: translateY(-1px); }
+.reaction-btn.active { background: var(--purple); border-color: var(--purple); color: #fff; }
+.reaction-count { font-size: 0.78rem; font-weight: 600; }
+
 /* ================= Freemium: candados, aviso de trial y modal de upsell ================= */
 
 /* QuickLinks bloqueados (Contactos, Sé mentora, Da un webinar) */
