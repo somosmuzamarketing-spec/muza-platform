@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import TopNav from "@/components/TopNav";
 import ShoutoutForm from "@/components/ShoutoutForm";
-import { REACTION_EMOJIS, toggleReaction } from "./actions";
+import { toggleReaction } from "./actions";
+import { REACTION_EMOJIS } from "./constants";
 
 function initials(label: string) {
   return (label || "M")
