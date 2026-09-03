@@ -3,12 +3,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { REACTION_EMOJIS } from "./constants";
 
 export type ShoutoutResult = { ok?: boolean; error?: string } | null;
-
-// Set de emojis permitidos para reaccionar a un logro. Mantenerlo corto y
-// alineado al tono de la comunidad (celebración, ánimo, cercanía).
-export const REACTION_EMOJIS = ["👏", "🎉", "❤️", "🔥", "💪"];
 
 export async function createShoutout(_prev: ShoutoutResult, formData: FormData): Promise<ShoutoutResult> {
   try {
