@@ -11,6 +11,8 @@ import ChatRoom from "@/components/ChatRoom";
 import { joinConversatorio } from "@/app/eventos/actions";
 import { getWelcomeRoomId } from "@/lib/welcomeRoom";
 import { hasActiveAccess, trialDaysLeft } from "@/lib/trial";
+import { toggleReaction } from "@/app/celebremos/actions";
+import { REACTION_EMOJIS } from "@/app/celebremos/constants";
 
 export default async function Dashboard() {
   const session = await getServerSession(authOptions);
@@ -59,7 +61,11 @@ export default async function Dashboard() {
         include: { options: { include: { votes: true }, orderBy: { order: "asc" } }, votes: true },
         orderBy: { createdAt: "desc" },
       }),
-      prisma.shoutout.findMany({ include: { user: true }, orderBy: { createdAt: "desc" }, take: 12 }),
+      prisma.shoutout.findMany({
+        include: { user: true, reactions: true },
+        orderBy: { createdAt: "desc" },
+        take: 12,
+      }),
       prisma.user.findMany({ where: { birthDate: { not: null }, isActive: true } }),
       prisma.event.count({ where: { startsAt: { gte: new Date() } } }),
       prisma.contact.count({
@@ -135,15 +141,29 @@ export default async function Dashboard() {
     ...todaysBirthdays.map((u) => ({
       key: `bday-${u.id}`,
       birthday: true,
+      shoutoutId: null as string | null,
       name: u.name || u.username,
       message: "¡Hoy está de cumpleaños! 🎂",
+      counts: {} as Record<string, number>,
+      mine: new Set<string>(),
     })),
-    ...shoutouts.map((s) => ({
-      key: s.id,
-      birthday: false,
-      name: s.user.name || s.user.username,
-      message: s.message,
-    })),
+    ...shoutouts.map((s) => {
+      const counts: Record<string, number> = {};
+      const mine = new Set<string>();
+      for (const r of s.reactions) {
+        counts[r.emoji] = (counts[r.emoji] || 0) + 1;
+        if (r.userId === userId) mine.add(r.emoji);
+      }
+      return {
+        key: s.id,
+        birthday: false,
+        shoutoutId: s.id as string | null,
+        name: s.user.name || s.user.username,
+        message: s.message,
+        counts,
+        mine,
+      };
+    }),
   ];
 
   return (
@@ -285,15 +305,37 @@ export default async function Dashboard() {
               <span>— logros y fechas de esta semana</span>
             </div>
             <div className="feed-scroll">
-              {feedItems.map((f) => (
-                <div key={f.key} className={`feed-item${f.birthday ? " birthday" : ""}`}>
-                  <div className="feed-avatar">{initials(f.name)}</div>
-                  <div>
-                    <p className="feed-name">{f.name}</p>
-                    <p className="feed-message">{f.message}</p>
+              {feedItems.map((f) => {
+                const shoutoutId = f.shoutoutId;
+                return (
+                  <div key={f.key} className={`feed-item${f.birthday ? " birthday" : ""}`}>
+                    <div className="feed-avatar">{initials(f.name)}</div>
+                    <div>
+                      <p className="feed-name">{f.name}</p>
+                      <p className="feed-message">{f.message}</p>
+                      {shoutoutId && (
+                        <div className="reaction-row compact">
+                          {REACTION_EMOJIS.map((emoji) => (
+                            <form action={toggleReaction} key={emoji}>
+                              <input type="hidden" name="shoutoutId" value={shoutoutId} />
+                              <input type="hidden" name="emoji" value={emoji} />
+                              <button
+                                type="submit"
+                                className={`reaction-btn${f.mine.has(emoji) ? " active" : ""}`}
+                                aria-pressed={f.mine.has(emoji)}
+                                title={f.mine.has(emoji) ? "Quitar reacción" : "Reaccionar"}
+                              >
+                                <span>{emoji}</span>
+                                {f.counts[emoji] ? <span className="reaction-count">{f.counts[emoji]}</span> : null}
+                              </button>
+                            </form>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             <div className="group-head-link">
               <Link href="/celebremos">Ver todo / compartir un logro →</Link>
