@@ -58,6 +58,7 @@ model User {
   challengeEntries  ChallengeEntry[]
   pollVotes         PollVote[]
   shoutouts         Shoutout[]
+  shoutoutReactions ShoutoutReaction[]
   boardPosts        BoardPost[]
   starsGiven        Star[]             @relation("StarGiver")
   starsReceived     Star[]             @relation("StarReceiver")
@@ -273,7 +274,22 @@ model Shoutout {
   message   String   @db.Text
   createdAt DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reactions ShoutoutReaction[]
+}
+
+// --- Reacciones con emoji a publicaciones de Celebremos ---
+model ShoutoutReaction {
+  id         String   @id @default(cuid())
+  shoutoutId String
+  userId     String
+  emoji      String   // uno de REACTION_EMOJIS (ver src/app/celebremos/actions.ts)
+  createdAt  DateTime @default(now())
+
+  shoutout Shoutout @relation(fields: [shoutoutId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([shoutoutId, userId, emoji])
 }
 
 // --- Busco colaboradora / Bolsa de oportunidades ---
