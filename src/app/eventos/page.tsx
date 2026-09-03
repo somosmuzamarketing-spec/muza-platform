@@ -68,9 +68,14 @@ export default async function EventosPage() {
                 {reserved ? (
                   <>
                     <p style={{ color: "var(--purple)", fontWeight: 600 }}>✓ Ya reservaste tu lugar</p>
-                    <div style={{ display: "flex", gap: "0.5rem" }}>
+                    <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
                       {event.isOnline && event.roomId && (
                         <a href={`/video/${event.roomId}`} className="btn">Entrar a la sala</a>
+                      )}
+                      {event.externalLink && (
+                        <a href={event.externalLink} target="_blank" rel="noopener noreferrer" className="btn gold">
+                          Ir al enlace del evento
+                        </a>
                       )}
                       <form action={cancelReservation}>
                         <input type="hidden" name="eventId" value={event.id} />
