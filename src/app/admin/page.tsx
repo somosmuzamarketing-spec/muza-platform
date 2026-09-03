@@ -435,6 +435,7 @@ export default async function AdminPage() {
               <tr>
                 <th>Nombre</th>
                 <th>Rol</th>
+                <th>Último ingreso</th>
                 <th>Clave</th>
               </tr>
             </thead>
@@ -446,6 +447,13 @@ export default async function AdminPage() {
                     <br /><span style={{ color: "var(--muted)", fontSize: "0.8rem" }}>{t.username}</span>
                   </td>
                   <td>{t.role}</td>
+                  <td>
+                    {t.lastLoginAt ? (
+                      new Date(t.lastLoginAt).toLocaleString("es", { dateStyle: "medium", timeStyle: "short" })
+                    ) : (
+                      <span style={{ color: "var(--muted)", fontSize: "0.8rem" }}>Nunca</span>
+                    )}
+                  </td>
                   <td>
                     <ResetPasswordButton userId={t.id} />
                   </td>
@@ -469,6 +477,7 @@ export default async function AdminPage() {
                 <th>Plan</th>
                 <th>Freemium</th>
                 <th>Activo</th>
+                <th>Último ingreso</th>
                 <th>Clave</th>
               </tr>
             </thead>
@@ -514,6 +523,13 @@ export default async function AdminPage() {
                       <input type="hidden" name="userId" value={m.id} />
                       <button type="submit" className="secondary">{m.isActive ? "Desactivar" : "Activar"}</button>
                     </form>
+                  </td>
+                  <td style={{ textAlign: "center" }}>
+                    {m.lastLoginAt ? (
+                      new Date(m.lastLoginAt).toLocaleString("es", { dateStyle: "medium", timeStyle: "short" })
+                    ) : (
+                      <span style={{ color: "var(--muted)", fontSize: "0.8rem" }}>Nunca</span>
+                    )}
                   </td>
                   <td style={{ textAlign: "center" }}>
                     <ResetPasswordButton userId={m.id} />
