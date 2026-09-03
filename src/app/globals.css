@@ -953,6 +953,12 @@ td { padding: 0.6rem; border-top: 1px solid var(--border); }
 .reaction-btn.active { background: var(--purple); border-color: var(--purple); color: #fff; }
 .reaction-count { font-size: 0.78rem; font-weight: 600; }
 
+/* Variante compacta: caben dentro de las tarjetas de 240px del widget de
+   Celebremos en el dashboard. */
+.reaction-row.compact { gap: 0.25rem; margin-top: 0.5rem; }
+.reaction-row.compact .reaction-btn { padding: 0.15rem 0.4rem; font-size: 0.78rem; gap: 0.2rem; }
+.reaction-row.compact .reaction-count { font-size: 0.68rem; }
+
 /* ================= Freemium: candados, aviso de trial y modal de upsell ================= */
 
 /* QuickLinks bloqueados (Contactos, Sé mentora, Da un webinar) */
