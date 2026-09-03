@@ -315,7 +315,7 @@ export default async function Dashboard() {
                       <p className="feed-message">{f.message}</p>
                       {shoutoutId && (
                         <div className="reaction-row compact">
-                          {REACTION_EMOJIS.map((emoji) => (
+                          {REACTION_EMOJIS.filter((emoji) => f.counts[emoji]).map((emoji) => (
                             <form action={toggleReaction} key={emoji}>
                               <input type="hidden" name="shoutoutId" value={shoutoutId} />
                               <input type="hidden" name="emoji" value={emoji} />
@@ -326,10 +326,31 @@ export default async function Dashboard() {
                                 title={f.mine.has(emoji) ? "Quitar reacción" : "Reaccionar"}
                               >
                                 <span>{emoji}</span>
-                                {f.counts[emoji] ? <span className="reaction-count">{f.counts[emoji]}</span> : null}
+                                <span className="reaction-count">{f.counts[emoji]}</span>
                               </button>
                             </form>
                           ))}
+                          <details className="reaction-add">
+                            <summary className="reaction-add-btn" title="Reaccionar">
+                              + Reaccionar
+                            </summary>
+                            <div className="reaction-menu">
+                              {REACTION_EMOJIS.map((emoji) => (
+                                <form action={toggleReaction} key={emoji}>
+                                  <input type="hidden" name="shoutoutId" value={shoutoutId} />
+                                  <input type="hidden" name="emoji" value={emoji} />
+                                  <button
+                                    type="submit"
+                                    className={`reaction-menu-btn${f.mine.has(emoji) ? " active" : ""}`}
+                                    aria-pressed={f.mine.has(emoji)}
+                                    title={f.mine.has(emoji) ? "Quitar reacción" : "Reaccionar"}
+                                  >
+                                    {emoji}
+                                  </button>
+                                </form>
+                              ))}
+                            </div>
+                          </details>
                         </div>
                       )}
                     </div>
