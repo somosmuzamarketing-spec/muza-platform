@@ -33,4 +33,20 @@ app.prepare().then(() => {
   httpServer.listen(port, () => {
     console.log(`> Muza platform lista en http://localhost:${port}`);
   });
+
+  // Chequeo cada 10 minutos de recordatorios de eventos (push + email a
+  // quien tiene reserva en un evento que arranca en ~1 hora). Sin servicio
+  // de cron aparte en Railway: este mismo proceso se golpea a sí mismo.
+  // Solo en producción para no mandar notificaciones reales corriendo local.
+  if (!dev) {
+    const REMINDER_CHECK_INTERVAL_MS = 10 * 60 * 1000;
+    setInterval(() => {
+      fetch(`http://localhost:${port}/api/internal/event-reminders`, {
+        method: "POST",
+        headers: { "X-Automation-Secret": process.env.AUTOMATION_WEBHOOK_SECRET || "" },
+      }).catch((err) => {
+        console.error("[event-reminders] No se pudo ejecutar el chequeo", err);
+      });
+    }, REMINDER_CHECK_INTERVAL_MS);
+  }
 });

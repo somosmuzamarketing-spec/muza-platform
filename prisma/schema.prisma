@@ -149,6 +149,7 @@ model Event {
   bannerUrl    String?  // imagen de banner del evento (dataURL base64)
   capacity     Int?     // null = sin límite de cupo
   createdAt    DateTime @default(now())
+  reminderSentAt DateTime? // cuándo se mandó el recordatorio "empieza en 1 hora" (null = todavía no)
 
   room         Room?              @relation(fields: [roomId], references: [id])
   reservations EventReservation[]
