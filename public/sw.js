@@ -1,4 +1,5 @@
-// Service worker mínimo de Muza — habilita "instalar como app" (PWA).
+// Service worker mínimo de Muza — habilita "instalar como app" (PWA) y las
+// notificaciones push del anuncio manual desde /admin (ver src/lib/push.ts).
 // A propósito NO cachea páginas, API ni el chat en tiempo real: todo el
 // contenido se sirve siempre desde la red para evitar sesiones o mensajes
 // desactualizados. Solo cachea assets estáticos (íconos) para que el ícono
@@ -56,5 +57,43 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith(
     caches.match(request).then((cached) => cached || fetch(request))
+  );
+});
+
+// --- Notificaciones push (anuncios manuales desde /admin) ---
+self.addEventListener("push", (event) => {
+  let data = { title: "Muza", body: "Tienes una novedad en Muza." };
+  try {
+    if (event.data) data = { ...data, ...event.data.json() };
+  } catch (e) {
+    // Si el payload no es JSON válido, usamos el texto plano como cuerpo.
+    if (event.data) data.body = event.data.text();
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      data: { url: data.url || "/dashboard" },
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || "/dashboard";
+
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if (client.url.includes(url) && "focus" in client) return client.focus();
+      }
+      if (clients.length > 0 && "focus" in clients[0]) {
+        clients[0].navigate(url);
+        return clients[0].focus();
+      }
+      return self.clients.openWindow(url);
+    })
   );
 });
