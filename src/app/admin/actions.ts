@@ -7,6 +7,9 @@ import { revalidatePath } from "next/cache";
 import { trialEndDate } from "@/lib/trial";
 import { getWelcomeRoomId } from "@/lib/welcomeRoom";
 import { generatePassword } from "@/lib/password";
+import { sendPushToAll } from "@/lib/push";
+import { sendMail } from "@/lib/mailer";
+import { announcementEmailSubject, announcementEmailHtml, announcementEmailText } from "@/lib/announcementEmail";
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions);
@@ -468,4 +471,68 @@ export async function deleteBoardPost(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/colaboracion");
   revalidatePath("/oportunidades");
+}
+
+// --- Anuncio manual: notifica a las miembras por push y/o email ---
+export type AnnouncementResult = {
+  error?: string;
+  pushSent?: number;
+  pushTotal?: number;
+  emailSent?: number;
+  emailTotal?: number;
+} | null;
+
+export async function sendAnnouncement(
+  _prev: AnnouncementResult,
+  formData: FormData
+): Promise<AnnouncementResult> {
+  try {
+    await requireAdmin();
+
+    const title = String(formData.get("title") || "").trim();
+    const message = String(formData.get("message") || "").trim();
+    const link = String(formData.get("link") || "").trim() || undefined;
+    const sendPush = formData.get("sendPush") === "on";
+    const sendEmail = formData.get("sendEmail") === "on";
+
+    if (!title || !message) throw new Error("El anuncio necesita un título y un mensaje.");
+    if (!sendPush && !sendEmail) throw new Error("Elige al menos un canal: notificación push o email.");
+
+    const result: AnnouncementResult = {};
+
+    if (sendPush) {
+      const { sent, total } = await sendPushToAll({ title, body: message, url: link || "/dashboard" });
+      result.pushSent = sent;
+      result.pushTotal = total;
+    }
+
+    if (sendEmail) {
+      const members = await prisma.user.findMany({
+        where: { isActive: true, email: { not: null } },
+        select: { name: true, username: true, email: true },
+      });
+
+      let emailSent = 0;
+      for (const m of members) {
+        if (!m.email) continue;
+        try {
+          await sendMail({
+            to: m.email,
+            subject: announcementEmailSubject(title),
+            html: announcementEmailHtml({ firstName: m.name || "", title, message, link }),
+            text: announcementEmailText({ firstName: m.name || "", title, message, link }),
+          });
+          emailSent++;
+        } catch {
+          // Seguimos con las demás aunque una falle (ej. correo inválido).
+        }
+      }
+      result.emailSent = emailSent;
+      result.emailTotal = members.length;
+    }
+
+    return result;
+  } catch (e: any) {
+    return { error: e.message || "Error enviando el anuncio." };
+  }
 }

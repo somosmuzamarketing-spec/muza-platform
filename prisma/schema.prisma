@@ -20,6 +20,7 @@ datasource db {
 // kind (BoardPost): "COLABORACION" | "OPORTUNIDAD"
 // status (BoardPost): "ABIERTA" | "CERRADA"
 // Star: reconocimiento ("⭐ Agradecer") de una muza hacia otra, por contacto conectado
+// PushSubscription: una por navegador/dispositivo con permiso de notificaciones activado
 
 model User {
   id           String       @id @default(cuid())
@@ -63,6 +64,7 @@ model User {
   boardPosts        BoardPost[]
   starsGiven        Star[]             @relation("StarGiver")
   starsReceived     Star[]             @relation("StarReceiver")
+  pushSubscriptions PushSubscription[]
 }
 
 model Room {
@@ -304,6 +306,19 @@ model BoardPost {
   link        String?
   status      String   @default("ABIERTA") // ABIERTA | CERRADA
   createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// --- Suscripciones a notificaciones push del navegador (una por dispositivo
+// instalado; una miembra puede tener varias si instala en más de un celular). ---
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique @db.Text
+  p256dh    String   @db.Text
+  auth      String   @db.Text
+  createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

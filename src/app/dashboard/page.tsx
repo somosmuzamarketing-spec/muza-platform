@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import TopNav from "@/components/TopNav";
+import PushNotificationOptIn from "@/components/PushNotificationOptIn";
 import QuickLinks from "@/components/QuickLinks";
 import ReferralBox from "@/components/ReferralBox";
 import PollWidget from "@/components/PollWidget";
@@ -169,6 +170,8 @@ export default async function Dashboard() {
   return (
     <div>
       <TopNav name={name} avatarUrl={user?.avatarUrl} role={role} plan={user?.plan} isMentor={user?.isMentor} />
+
+        <PushNotificationOptIn />
 
       <div className="welcome-band">
         <div className="band-inner">

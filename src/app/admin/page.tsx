@@ -28,6 +28,7 @@ import CreateMemberForm from "@/components/CreateMemberForm";
 import ApproveRequestButton from "@/components/ApproveRequestButton";
 import EventBannerUpload from "@/components/EventBannerUpload";
 import ResetPasswordButton from "@/components/ResetPasswordButton";
+import AnnouncementForm from "@/components/AnnouncementForm";
 import { trialDaysLeft } from "@/lib/trial";
 
 function nominationTypeLabel(type: string) {
@@ -169,6 +170,15 @@ export default async function AdminPage() {
             ))}
           </div>
         )}
+
+        <div className="card">
+          <h2>Enviar anuncio</h2>
+          <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
+            Notifica a las miembras por notificación push y/o email. Úsalo para avisos puntuales: nuevo contenido,
+            un evento próximo, la edición nueva del magazine, etc.
+          </p>
+          <AnnouncementForm />
+        </div>
 
         <div className="card">
           <h2>Crear miembro manualmente</h2>
