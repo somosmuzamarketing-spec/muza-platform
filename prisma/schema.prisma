@@ -42,6 +42,12 @@ model User {
   createdAt    DateTime     @default(now())
   lastLoginAt  DateTime?
 
+  // --- Recuperación de clave ("olvidé mi contraseña") ---
+  // Token de un solo uso enviado por correo. Nulo cuando no hay un pedido de
+  // reset pendiente; se limpia al usarse o al pedir uno nuevo.
+  resetToken          String?   @unique
+  resetTokenExpiresAt DateTime?
+
   // --- Freemium: mes de bienvenida sin pago confirmado ---
   // Nulo para miembras pagas normales. Se llena solo al crear una cuenta
   // freemium nueva (hoy + 30 días). Se limpia al aprobarse su pago.
