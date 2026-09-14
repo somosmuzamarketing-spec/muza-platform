@@ -58,6 +58,9 @@ export default function LoginPage() {
           <button type="submit" className="gold" disabled={loading} style={{ width: "100%", marginTop: "0.4rem" }}>
             {loading ? "Entrando..." : "Entrar"}
           </button>
+          <p style={{ textAlign: "center", marginTop: "1rem", fontSize: "0.85rem" }}>
+            <Link href="/olvide-clave">¿Olvidaste tu clave?</Link>
+          </p>
         </form>
         <div className="auth-divider">o</div>
         <p style={{ textAlign: "center", marginBottom: "0.9rem", fontSize: "0.85rem", color: "var(--muted)" }}>

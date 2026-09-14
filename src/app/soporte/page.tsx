@@ -6,7 +6,7 @@ import TopNav from "@/components/TopNav";
 import TicketForm from "@/components/TicketForm";
 
 const FAQ = [
-  { q: "¿Cómo recupero mi clave si la olvidé?", a: "Escríbenos por aquí o por WhatsApp con tu usuario y te ayudamos a restablecerla." },
+  { q: "¿Cómo recupero mi clave si la olvidé?", a: "Ve a la pantalla de inicio de sesión y toca '¿Olvidaste tu clave?'. Te mandamos un link a tu email para elegir una nueva. Si no tienes email cargado, escríbenos por aquí o por WhatsApp." },
   { q: "¿Puedo cambiar de plan a Muza+?", a: "Sí, cuéntanos por este medio y te compartimos los detalles y el enlace de pago." },
   { q: "¿Cómo reservo mi lugar en un evento?", a: "Ve a la sección Eventos en tu panel y presiona 'Reservar mi lugar'. Los cupos son limitados." },
 ];
