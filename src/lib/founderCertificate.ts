@@ -3,21 +3,30 @@
 // Reemplaza el certificado que en el borrador de Mailchimp quedó pendiente
 // ("Adjunto encontrarás tu Certificado Digital", sin generarse de verdad).
 //
-// Usa pdf-lib (sin dependencias nativas, corre bien en el runtime de
-// Node de Railway) y la misma paleta de marca que welcomeEmail.ts.
+// Usa el diseño OFICIAL de Muza (el mismo PDF que ya se le entregó a mano a
+// las primeras Fundadoras, ej. Kelly Nucete) como fondo, y solo dibuja encima
+// el nombre y la fecha de cada nueva Fundadora — así el resultado es igual
+// al certificado real, no una versión simplificada hecha con formas básicas.
 
-import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { PDFDocument, PDFFont, PDFPage, rgb } from "pdf-lib";
+import fontkit from "@pdf-lib/fontkit";
 import { readFile } from "fs/promises";
 import path from "path";
 
-const MORADO = rgb(0x4a / 255, 0x1c / 255, 0x39 / 255);
-const DORADO = rgb(0xd8 / 255, 0xb4 / 255, 0x6a / 255);
-const CREMA = rgb(0xfb / 255, 0xf6 / 255, 0xec / 255);
-const TEXTO = rgb(0x15 / 255, 0x0c / 255, 0x14 / 255);
-const MUTED = rgb(0x7a / 255, 0x66 / 255, 0x56 / 255);
+// Tamaño de página = tamaño exacto del diseño oficial (1536 x 1024 pt).
+const PAGE_WIDTH = 1536;
+const PAGE_HEIGHT = 1024;
 
-function formatFecha(d: Date) {
-  return d.toLocaleDateString("es-PE", { year: "numeric", month: "long", day: "numeric" });
+// Color de tinta usado en el certificado oficial (muestreado del PDF real).
+const TINTA = rgb(0x38 / 255, 0x0b / 255, 0x2e / 255);
+
+const MESES = [
+  "ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO",
+  "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE",
+];
+
+function formatFechaCorta(d: Date) {
+  return `${MESES[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 export async function generateFounderCertificatePdf({
@@ -28,81 +37,77 @@ export async function generateFounderCertificatePdf({
 }: {
   name: string;
   founderNumber: number;
-  plan: string; // ej. "Anual"
+  plan: string; // no se usa en el diseño oficial (se mantiene por compatibilidad con el llamador)
   activatedAt: Date;
 }): Promise<Buffer> {
   const doc = await PDFDocument.create();
-  // Tamaño carta apaisado (letter landscape), en puntos.
-  const page = doc.addPage([792, 612]);
-  const { width, height } = page.getSize();
+  doc.registerFontkit(fontkit);
 
-  const serifBold = await doc.embedFont(StandardFonts.TimesRomanBold);
-  const serif = await doc.embedFont(StandardFonts.TimesRoman);
-  const serifItalic = await doc.embedFont(StandardFonts.TimesRomanItalic);
+  const page = doc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
 
-  // Fondo crema + marco morado con borde dorado.
-  page.drawRectangle({ x: 0, y: 0, width, height, color: CREMA });
-  const margin = 28;
-  page.drawRectangle({
-    x: margin,
-    y: margin,
-    width: width - margin * 2,
-    height: height - margin * 2,
-    borderColor: MORADO,
-    borderWidth: 2,
+  // Fondo: el diseño oficial del certificado (logo, sello, firma, textos fijos),
+  // con el nombre y la fecha de ejemplo ya "borrados" para poder escribir encima.
+  const templatePath = path.join(process.cwd(), "public", "founder-certificate-template.jpg");
+  const templateBytes = await readFile(templatePath);
+  const templateImage = await doc.embedJpg(templateBytes);
+  page.drawImage(templateImage, { x: 0, y: 0, width: PAGE_WIDTH, height: PAGE_HEIGHT });
+
+  // Tipografías: script para el nombre (mismo estilo que el original) y sans
+  // con tracking para la fecha, igual que el resto de las etiquetas del diseño.
+  const scriptFontPath = path.join(process.cwd(), "src/lib/fonts/AlexBrush-Regular.ttf");
+  const sansFontPath = path.join(process.cwd(), "src/lib/fonts/Poppins-Medium.ttf");
+  const scriptFont = await doc.embedFont(await readFile(scriptFontPath));
+  const sansFont = await doc.embedFont(await readFile(sansFontPath));
+
+  // --- Nombre, centrado sobre la línea dorada ---
+  // maxWidth se deja con margen extra porque esta fuente script tiene
+  // florituras decorativas (swashes) que sobresalen del ancho "oficial" del texto.
+  const nameSize = fitFontSize(scriptFont, name, 150, 1150);
+  const nameWidth = scriptFont.widthOfTextAtSize(name, nameSize);
+  page.drawText(name, {
+    x: (PAGE_WIDTH - nameWidth) / 2,
+    y: 584,
+    size: nameSize,
+    font: scriptFont,
+    color: TINTA,
   });
-  page.drawRectangle({
-    x: margin + 8,
-    y: margin + 8,
-    width: width - (margin + 8) * 2,
-    height: height - (margin + 8) * 2,
-    borderColor: DORADO,
-    borderWidth: 1,
-  });
 
-  // Logo, si está disponible (no rompe la generación si falta el archivo).
-  let cursorY = height - 96;
-  try {
-    const logoPath = path.join(process.cwd(), "public", "logo-horizontal.png");
-    const logoBytes = await readFile(logoPath);
-    const logoImage = await doc.embedPng(logoBytes);
-    const logoW = 220;
-    const logoH = (logoImage.height / logoImage.width) * logoW;
-    page.drawImage(logoImage, {
-      x: (width - logoW) / 2,
-      y: cursorY - logoH + 20,
-      width: logoW,
-      height: logoH,
-    });
-    cursorY -= logoH + 10;
-  } catch {
-    // Sin logo disponible: seguimos sin bloquear el certificado.
-  }
-
-  const centerText = (text: string, y: number, font = serif, size = 14, color = TEXTO) => {
-    const textWidth = font.widthOfTextAtSize(text, size);
-    page.drawText(text, { x: (width - textWidth) / 2, y, size, font, color });
-  };
-
-  centerText("CERTIFICADO", cursorY - 18, serifBold, 28, MORADO);
-  centerText("Muza Fundadora", cursorY - 48, serifItalic, 18, DORADO);
-
-  centerText("Este certificado reconoce a", cursorY - 96, serif, 13, MUTED);
-  centerText(name, cursorY - 128, serifBold, 26, TEXTO);
-  centerText("como una de las primeras 100 mujeres en construir Muza desde el inicio.", cursorY - 154, serif, 13, MUTED);
-
-  // Datos de membresía, en una franja inferior.
-  const detailsY = 150;
-  const details = [
-    `Fundadora #${founderNumber}`,
-    `Plan: ${plan}`,
-    `Fecha de activación: ${formatFecha(activatedAt)}`,
-  ];
-  const detailsText = details.join("   •   ");
-  centerText(detailsText, detailsY, serif, 12, TEXTO);
-
-  centerText("Con cariño, Karen y el equipo Muza", 90, serifItalic, 12, MUTED);
+  // --- Fecha (mes + año, en mayúsculas con tracking), centrada en su columna ---
+  const fecha = formatFechaCorta(activatedAt);
+  drawTrackedText(page, fecha, sansFont, 20, 4.5, 1227, 167, TINTA);
 
   const pdfBytes = await doc.save();
   return Buffer.from(pdfBytes);
+}
+
+// Reduce el tamaño de fuente si el nombre es muy largo, para que nunca se
+// salga del ancho disponible (algunas Fundadoras tienen nombres compuestos).
+function fitFontSize(font: PDFFont, text: string, maxSize: number, maxWidth: number) {
+  let size = maxSize;
+  while (size > 40 && font.widthOfTextAtSize(text, size) > maxWidth) {
+    size -= 2;
+  }
+  return size;
+}
+
+// Dibuja texto en mayúsculas con letter-spacing manual, centrado en centerX,
+// con la línea de base en y (pdf-lib no soporta tracking nativo).
+function drawTrackedText(
+  page: PDFPage,
+  text: string,
+  font: PDFFont,
+  size: number,
+  tracking: number,
+  centerX: number,
+  y: number,
+  color: ReturnType<typeof rgb>
+) {
+  const chars = text.split("");
+  const totalWidth =
+    chars.reduce((sum, c) => sum + font.widthOfTextAtSize(c, size), 0) + tracking * (chars.length - 1);
+  let x = centerX - totalWidth / 2;
+  for (const c of chars) {
+    page.drawText(c, { x, y, size, font, color });
+    x += font.widthOfTextAtSize(c, size) + tracking;
+  }
 }
