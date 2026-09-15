@@ -19,8 +19,14 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.username || !credentials?.password) return null;
 
+        // Normalizado igual que el alta y "olvidé mi clave": todo username
+        // en este sistema es minúscula por construcción, así que esto evita
+        // que un email tipeado con mayúsculas (autocapitalize del celular)
+        // falle el login de una cuenta creada con ese mismo email en minúscula.
+        const username = credentials.username.trim().toLowerCase();
+
         const user = await prisma.user.findUnique({
-          where: { username: credentials.username },
+          where: { username },
         });
         if (!user) return null;
 
