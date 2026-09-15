@@ -61,7 +61,7 @@ export default async function TopNav({ name, avatarUrl, role, plan, isMentor }: 
           )}
           <span className="nav-avatar-name">
             {name}
-            {plan === "MUZA_PLUS" && <span className="badge gold" style={{ marginLeft: "0.4rem" }}>Muza+</span>}
+            {plan === "MUZA_PLUS" && <span className="badge gold" style={{ marginLeft: "0.4rem" }}>Muza Fundadora · 2026</span>}
             {isMentor && <span className="badge" style={{ marginLeft: "0.4rem" }}>Mentora</span>}
           </span>
         </Link>

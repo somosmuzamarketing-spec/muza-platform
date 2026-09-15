@@ -1,7 +1,10 @@
 "use client";
 import { useState, type ReactNode } from "react";
-import Link from "next/link";
 import { LOCK_ICON } from "./icons";
+
+// Página pública (WordPress) donde se completa el pago de Muza Fundadora.
+// Es el CTA principal de todo paywall contextual de la plataforma.
+const FUNDADORA_URL = "https://somosmuza.com/fundadora/";
 
 const DEFAULT_BODY =
   "Conecta directamente con el resto de la red de Muzas. Tu mes de acceso ya te dejó ver quién está aquí — conectar y escribirle es parte de la membresía completa.";
@@ -31,11 +34,11 @@ function UpsellDialog({
             Te quedan {daysLeft} día{daysLeft === 1 ? "" : "s"} de tu mes gratis
           </div>
         )}
-        <Link href="/soporte" className="upsell-cta">
-          Activar mi membresía
-        </Link>
+        <a href={FUNDADORA_URL} className="upsell-cta">
+          Abrir toda la red
+        </a>
         <button type="button" className="upsell-dismiss" onClick={onClose}>
-          Ahora no, seguir explorando
+          Seguir explorando
         </button>
       </div>
     </div>

@@ -157,10 +157,14 @@ export async function approvePaymentRequest(_prev: ActionResult, formData: FormD
     // Pago manual (Binance/PayPal) de una miembra que ya tiene cuenta creada
     // con su mes freemium: se confirma su pago sobre esa cuenta existente,
     // en vez de crear una nueva (eso solo aplica al flujo histórico de Stripe).
+    // Un solo clic activa todo el estado de Muza Fundadora: sale del trial,
+    // se reactiva si estaba inactiva, y pasa a plan MUZA_PLUS (antes este
+    // último paso quedaba en manos de un segundo toggle manual aparte, y era
+    // fácil de olvidar).
     if (request.userId) {
       await prisma.user.update({
         where: { id: request.userId },
-        data: { trialEndsAt: null, isActive: true },
+        data: { trialEndsAt: null, isActive: true, plan: "MUZA_PLUS" },
       });
       await prisma.paymentRequest.update({
         where: { id },
@@ -181,6 +185,11 @@ export async function approvePaymentRequest(_prev: ActionResult, formData: FormD
         name: request.fullName,
         email: request.email,
         role: "MEMBER",
+        // Flujo histórico: acá el pago (Stripe) sucede ANTES de que exista
+        // cuenta, así que quien llega a este punto ya pagó — le corresponde
+        // el plan pagado desde el día uno, igual que a quien paga sobre una
+        // cuenta freemium existente (ver el otro branch de esta función).
+        plan: "MUZA_PLUS",
       },
     });
 

@@ -189,7 +189,7 @@ export default async function Dashboard() {
               </p>
               <h1 style={{ margin: 0 }}>
                 Hola, {name || "Muza"} 👋
-                {user?.plan === "MUZA_PLUS" && <span className="badge gold" style={{ marginLeft: "0.5rem" }}>Muza+</span>}
+                {user?.plan === "MUZA_PLUS" && <span className="badge gold" style={{ marginLeft: "0.5rem" }}>Muza Fundadora · 2026</span>}
               </h1>
             </div>
           </div>
@@ -374,7 +374,7 @@ export default async function Dashboard() {
             <span>
               Te quedan {daysLeft} día{daysLeft === 1 ? "" : "s"} de tu mes en Muza.
             </span>
-            <Link href="/soporte">Activar mi membresía →</Link>
+            <a href="https://somosmuza.com/fundadora/">Abrir toda la red →</a>
           </div>
         )}
 
@@ -442,12 +442,13 @@ export default async function Dashboard() {
 
         {user?.plan !== "MUZA_PLUS" && (
           <div className="card upsell-card">
-            <span className="pill-banner">Muza+</span>
-            <h3 style={{ marginTop: "0.6rem" }}>Lleva tu experiencia al siguiente nivel</h3>
+            <span className="pill-banner">Muza Fundadora</span>
+            <h3 style={{ marginTop: "0.6rem" }}>Abre toda la red</h3>
             <p style={{ color: "var(--muted)" }}>
-              Con Muza+ accedes a salas exclusivas, mentorías 1:1 y prioridad en cupos de eventos.
+              Directorio completo, conexiones directas, Encuentra a tu Muza, mentoría, encuentros privados y el
+              distintivo permanente "Muza Fundadora · 2026".
             </p>
-            <Link href="/soporte" className="btn gold">Quiero saber más</Link>
+            <a href="https://somosmuza.com/fundadora/" className="btn gold">Abrir toda la red</a>
           </div>
         )}
 
