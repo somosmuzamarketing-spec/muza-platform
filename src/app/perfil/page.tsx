@@ -59,7 +59,7 @@ export default async function PerfilPage() {
                 <p className="profile-title">{user.title || "Miembro Muza"}</p>
               </div>
               <div className="profile-badges">
-                {user.plan === "MUZA_PLUS" && <span className="badge gold">Muza+</span>}
+                {user.plan === "MUZA_PLUS" && <span className="badge gold">Muza Fundadora · 2026</span>}
                 {user.isMentor && <span className="badge">Mentora</span>}
               </div>
             </div>
