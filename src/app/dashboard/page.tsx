@@ -227,7 +227,7 @@ export default async function Dashboard() {
                       {activeSpotlight.roleLabel && <p className="spotlight-role">{activeSpotlight.roleLabel}</p>}
                     </div>
                   </div>
-                  <p className="spotlight-quote">"{activeSpotlight.quote}"</p>
+                  <p className="spotlight-quote">“{activeSpotlight.quote}”</p>
                 </div>
               )}
 
