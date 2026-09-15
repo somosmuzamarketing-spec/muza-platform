@@ -30,6 +30,7 @@ import EventBannerUpload from "@/components/EventBannerUpload";
 import ResetPasswordButton from "@/components/ResetPasswordButton";
 import AnnouncementForm from "@/components/AnnouncementForm";
 import { trialDaysLeft } from "@/lib/trial";
+import { processFounderSequenceSweep } from "@/lib/founderSequence";
 
 function nominationTypeLabel(type: string) {
   if (type === "MENTORA") return "Mentora";
@@ -43,6 +44,11 @@ function nominationTypeLabel(type: string) {
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);
   if ((session?.user as any)?.role !== "ADMIN") redirect("/dashboard");
+
+  // Sin cron en Railway para este proyecto: cada visita al panel avanza la
+  // secuencia de bienvenida "Muza Fundadora" para quien le toque. No debe
+  // romper el panel si algo falla (ver founderSequence.ts).
+  processFounderSequenceSweep().catch(() => {});
 
   const [
     teamAccounts,
