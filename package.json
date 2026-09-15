@@ -17,6 +17,7 @@
     "dependencies": {
           "@livekit/components-react": "^2.6.7",
           "@livekit/components-styles": "^1.1.4",
+          "@pdf-lib/fontkit": "^1.1.1",
           "@prisma/client": "^5.19.1",
           "bcryptjs": "^2.4.3",
           "livekit-client": "^2.5.7",
