@@ -10,6 +10,7 @@ import { generatePassword } from "@/lib/password";
 import { sendPushToAll } from "@/lib/push";
 import { sendMail } from "@/lib/mailer";
 import { announcementEmailSubject, announcementEmailHtml, announcementEmailText } from "@/lib/announcementEmail";
+import { startFounderSequence } from "@/lib/founderSequence";
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions);
@@ -170,6 +171,14 @@ export async function approvePaymentRequest(_prev: ActionResult, formData: FormD
         where: { id },
         data: { status: "APPROVED", approvedAt: new Date() },
       });
+      // Secuencia de bienvenida "Muza Fundadora" (Email 1 inmediato, el
+      // resto vía el sweep de /admin y /dashboard). No debe tumbar la
+      // aprobación del pago si falla el envío.
+      try {
+        await startFounderSequence(request.userId);
+      } catch (e) {
+        console.error("Error iniciando la secuencia de Fundadora:", e);
+      }
       revalidatePath("/admin");
       return {};
     }
@@ -200,6 +209,12 @@ export async function approvePaymentRequest(_prev: ActionResult, formData: FormD
       where: { id },
       data: { status: "APPROVED", approvedAt: new Date(), generatedUsername: username },
     });
+
+    try {
+      await startFounderSequence(newUser.id);
+    } catch (e) {
+      console.error("Error iniciando la secuencia de Fundadora:", e);
+    }
 
     revalidatePath("/admin");
     return { username, password };

@@ -14,12 +14,19 @@ import { getWelcomeRoomId } from "@/lib/welcomeRoom";
 import { hasActiveAccess, trialDaysLeft } from "@/lib/trial";
 import { toggleReaction } from "@/app/celebremos/actions";
 import { REACTION_EMOJIS } from "@/app/celebremos/constants";
+import { processFounderSequenceForUser } from "@/lib/founderSequence";
 
 export default async function Dashboard() {
   const session = await getServerSession(authOptions);
   const userId = (session?.user as any)?.id;
   const role = (session?.user as any)?.role;
   const sessionName = session?.user?.name || "";
+
+  // Segundo disparador (además del panel /admin) para que la secuencia de
+  // bienvenida "Muza Fundadora" avance sin depender de un cron: cuando ella
+  // misma entra a su dashboard, se revisa solo su propia cuenta. Fire-and-forget:
+  // nunca debe retrasar ni romper la carga del dashboard.
+  if (userId) processFounderSequenceForUser(userId).catch(() => {});
 
   const [
     user,

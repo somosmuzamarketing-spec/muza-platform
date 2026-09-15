@@ -5,11 +5,15 @@ export async function sendMail({
   subject,
   html,
   text,
+  attachments,
 }: {
   to: string;
   subject: string;
   html: string;
   text?: string;
+  // Adjuntos opcionales (ej. certificado PDF). content va en base64, tal
+  // como lo espera la API de Mandrill.
+  attachments?: { name: string; type: string; content: string }[];
 }) {
   const res = await fetch("https://mandrillapp.com/api/1.0/messages/send.json", {
     method: "POST",
@@ -23,6 +27,7 @@ export async function sendMail({
         from_email: process.env.MAIL_FROM_EMAIL,
         from_name: process.env.MAIL_FROM_NAME || "Muza",
         to: [{ email: to, type: "to" }],
+        attachments: attachments && attachments.length ? attachments : undefined,
       },
     }),
   });

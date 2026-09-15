@@ -54,6 +54,23 @@ model User {
   trialEndsAt  DateTime?
   paymentRequests PaymentRequest[]
 
+  // --- Secuencia de bienvenida "Muza Fundadora" (post-pago) ---
+  // Portada del flujo que estaba armado (sin activar) en Mailchimp, ahora
+  // resuelta con código propio: no depende de un cron externo, se procesa
+  // en cada visita al panel /admin (sweep de todas las Fundadoras
+  // pendientes) y en el propio /dashboard de la Fundadora (best-effort).
+  // founderNumber se asigna una sola vez, la primera vez que el plan pasa a
+  // MUZA_PLUS. founderSequenceStartedAt es el punto de partida (T0) para
+  // los plazos de la secuencia; cada *_EmailAt queda null hasta enviarse,
+  // y sirve de base de tiempo para el siguiente paso.
+  founderNumber              Int?      @unique
+  founderSequenceStartedAt   DateTime?
+  founderWelcomeEmailAt      DateTime? // Email 1 - Bienvenida Fundadora
+  founderCommunityEmailAt    DateTime? // Email 2 - Tu comunidad (+2 días)
+  founderStoryEmailAt        DateTime? // Email 3 - Tu historia se publica (cuando el perfil/bio está completo)
+  founderCertificateEmailAt  DateTime? // Email 4 - Tu certificado (+2 días, con PDF adjunto)
+  founderCheckinEmailAt      DateTime? // Email 6 - Check-in (+23 días; Email 5 de webinar queda fuera por ahora)
+
   memberships       Membership[]
   messages          Message[]
   reservations      EventReservation[]
