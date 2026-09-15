@@ -19,7 +19,11 @@ export async function requestPasswordReset(
   _prev: RequestResetResult,
   formData: FormData
 ): Promise<RequestResetResult> {
-  const identifier = String(formData.get("identifier") || "").trim();
+  // Se normaliza igual que en el alta (trim + minúsculas): todo username en
+  // este sistema es minúscula por construcción (slugifyUsername, o el email
+  // tal cual en el alta automática), así que esto no cambia búsquedas
+  // legítimas y sí evita que "Ana@Gmail.com" no encuentre a "ana@gmail.com".
+  const identifier = String(formData.get("identifier") || "").trim().toLowerCase();
   if (!identifier) return { error: "Escribe tu usuario o tu email." };
 
   try {
