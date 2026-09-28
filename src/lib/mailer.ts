@@ -1,4 +1,14 @@
-// Proveedor principal: el relay seguro instalado en somosmuza.com. De esta
+// Proveedor principal: SMTP de hola@somosmuza.com (Private Email), el mismo
+// servidor que usa WP Mail SMTP en WordPress, así que los correos salen con
+// SPF y DKIM válidos para somosmuza.com.
+//
+// Variables de entorno en Railway:
+// - SMTP_HOST (mail.privateemail.com), SMTP_PORT (587), SMTP_USER
+//   (hola@somosmuza.com) y SMTP_PASS
+// - SMTP_FROM (opcional, por defecto SMTP_USER)
+//
+// Respaldo: el relay de WordPress (wordpress-plugin/muza-mail-relay), que
+// funciona solo si el plugin está instalado en somosmuza.com. De esta
 // forma los correos transaccionales de la plataforma salen por el mismo
 // sistema de WordPress/Contact Form 7 y no requieren una suscripción de
 // Mailchimp Transactional (Mandrill).
@@ -9,7 +19,52 @@
 //
 // Mandrill queda como respaldo opcional si en el futuro se contrata:
 // - MANDRILL_API_KEY, MAIL_FROM_EMAIL, MAIL_FROM_NAME
+import nodemailer from "nodemailer";
+
 type MailAttachment = { name: string; type: string; content: string };
+
+async function sendWithSmtp({
+  to,
+  subject,
+  html,
+  text,
+  attachments,
+}: {
+  to: string;
+  subject: string;
+  html: string;
+  text?: string;
+  attachments?: MailAttachment[];
+}) {
+  const host = process.env.SMTP_HOST;
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+
+  if (!host || !user || !pass) return false;
+
+  const port = Number(process.env.SMTP_PORT || 587);
+  const transporter = nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: { user, pass },
+  });
+
+  await transporter.sendMail({
+    from: { name: process.env.MAIL_FROM_NAME || "Muza", address: process.env.SMTP_FROM || user },
+    to,
+    subject,
+    html,
+    text,
+    attachments: attachments?.map((a) => ({
+      filename: a.name,
+      contentType: a.type,
+      content: Buffer.from(a.content, "base64"),
+    })),
+  });
+
+  return true;
+}
 
 async function sendWithWordPress({
   to,
@@ -112,10 +167,11 @@ export async function sendMail({
   attachments?: MailAttachment[];
 }) {
   const mail = { to, subject, html, text, attachments };
+  if (await sendWithSmtp(mail)) return;
   if (await sendWithWordPress(mail)) return;
   if (await sendWithMandrill(mail)) return;
 
   throw new Error(
-    "No hay un proveedor de correo configurado. Configura WORDPRESS_MAIL_RELAY_URL y WORDPRESS_MAIL_RELAY_SECRET."
+    "No hay un proveedor de correo configurado. Configura SMTP_HOST, SMTP_USER y SMTP_PASS."
   );
 }
