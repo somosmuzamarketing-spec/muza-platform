@@ -22,7 +22,7 @@ export default function LoginPage() {
     });
     setLoading(false);
     if (res?.error) {
-      setError("Usuario o clave incorrectos.");
+      setError("Email o clave incorrectos.");
       return;
     }
     router.push("/dashboard");
@@ -47,8 +47,8 @@ export default function LoginPage() {
         </p>
         <form onSubmit={handleSubmit} style={{ marginTop: "1.6rem" }}>
           <div className="field">
-            <label htmlFor="username">Usuario</label>
-            <input id="username" placeholder="Tu usuario" value={username} onChange={(e) => setUsername(e.target.value)} required />
+            <label htmlFor="username">Email</label>
+            <input id="username" placeholder="tu@email.com" autoComplete="username" autoCapitalize="none" value={username} onChange={(e) => setUsername(e.target.value)} required />
           </div>
           <div className="field">
             <label htmlFor="password">Clave</label>
@@ -60,6 +60,9 @@ export default function LoginPage() {
           </button>
           <p style={{ textAlign: "center", marginTop: "1rem", fontSize: "0.85rem" }}>
             <Link href="/olvide-clave">¿Olvidaste tu clave?</Link>
+          </p>
+          <p style={{ textAlign: "center", marginTop: "0.4rem", fontSize: "0.8rem", color: "var(--muted)" }}>
+            ¿No puedes entrar? Escríbenos a <a href="mailto:hola@somosmuza.com">hola@somosmuza.com</a>
           </p>
         </form>
         <div className="auth-divider">o</div>
