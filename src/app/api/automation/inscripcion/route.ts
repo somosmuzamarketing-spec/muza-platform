@@ -20,8 +20,9 @@
 // Railway, sin valores acá):
 // - AUTOMATION_WEBHOOK_SECRET: secreto compartido con Uncanny Automator,
 //   enviado en el header X-Automation-Secret para autenticar el webhook.
-// - MANDRILL_API_KEY: clave de Mailchimp Transactional / Mandrill.
-// - MAIL_FROM_EMAIL, MAIL_FROM_NAME: remitente del correo de bienvenida.
+// - WORDPRESS_MAIL_RELAY_URL y WORDPRESS_MAIL_RELAY_SECRET: relay seguro que
+//   envía por el correo de WordPress (mismo sistema usado por Contact Form 7).
+// - MANDRILL_API_KEY, MAIL_FROM_EMAIL y MAIL_FROM_NAME: respaldo opcional.
 // - NEXT_PUBLIC_APP_URL: base para el link de "crear mi contraseña".
 import { NextResponse } from "next/server";
 import crypto from "crypto";
@@ -75,7 +76,32 @@ export async function POST(req: Request) {
     where: { OR: [{ email }, { username: email }] },
   });
   if (existing) {
-    return NextResponse.json({ ok: true, alreadyExists: true });
+    // Un reintento debe volver a mandar el enlace. Esto es especialmente
+    // importante si el primer correo falló por una configuración incompleta
+    // del proveedor. No cambia la contraseña: solo genera un nuevo token de
+    // un solo uso, igual que el flujo de "Olvidé mi contraseña".
+    const retryToken = crypto.randomBytes(32).toString("hex");
+    await prisma.user.update({
+      where: { id: existing.id },
+      data: {
+        resetToken: retryToken,
+        resetTokenExpiresAt: new Date(Date.now() + TOKEN_TTL_MS),
+      },
+    });
+
+    try {
+      const setPasswordUrl = `${appUrl()}/restablecer-clave/${retryToken}`;
+      await sendMail({
+        to: email,
+        subject: welcomeEmailSubject(),
+        html: welcomeEmailHtml({ firstName: name, setPasswordUrl }),
+        text: welcomeEmailText({ firstName: name, setPasswordUrl }),
+      });
+    } catch (err) {
+      console.error("[automation/inscripcion] No se pudo reenviar el correo de bienvenida", err);
+    }
+
+    return NextResponse.json({ ok: true, alreadyExists: true, activationEmailRequested: true });
   }
 
   const fullName = `${name} ${lastname}`.trim();
