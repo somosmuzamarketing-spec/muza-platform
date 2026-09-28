@@ -1,7 +1,6 @@
-import { prisma } from "./prisma";
-
-// Duración del mes de bienvenida (freemium) que se otorga a toda candidata
-// que pasa la entrevista, a la espera de confirmar su pago (Binance o PayPal).
+// `trialEndsAt` se conserva por compatibilidad con las cuentas existentes y
+// se usa únicamente como marcador de acceso gratuito. El acceso gratuito no
+// caduca ni desactiva la cuenta; al aprobar el pago se limpia este campo.
 export const TRIAL_DAYS = 30;
 
 export function trialEndDate(from: Date = new Date()): Date {
@@ -29,28 +28,20 @@ export function hasActiveAccess(user: TrialUser): boolean {
 }
 
 export function isTrialExpired(user: TrialUser): boolean {
-  return user.trialEndsAt != null && user.trialEndsAt.getTime() <= Date.now();
+  return false;
 }
 
-// Días restantes del mes freemium (redondeado hacia arriba, nunca negativo).
-// null si la cuenta no está en trial.
+// Ya no existe una cuenta regresiva: Muza gratuita permanece activa.
 export function trialDaysLeft(user: TrialUser): number | null {
-  if (!user.trialEndsAt) return null;
-  const msLeft = user.trialEndsAt.getTime() - Date.now();
-  return Math.max(0, Math.ceil(msLeft / (24 * 60 * 60 * 1000)));
+  return null;
 }
 
-// Chequeo perezoso de vencimiento: se llama al iniciar sesión (no hay cron).
-// Si el mes freemium ya venció sin pago confirmado, desactiva la cuenta en
-// ese momento (el perfil no se borra) y devuelve el estado de isActive final.
+// Compatibilidad con el flujo de login histórico. Ya no se desactiva a una
+// Muza gratuita por el paso del tiempo.
 export async function enforceTrialExpiry(user: {
   id: string;
   isActive: boolean;
   trialEndsAt: Date | null;
 }): Promise<boolean> {
-  if (user.isActive && isTrialExpired(user)) {
-    await prisma.user.update({ where: { id: user.id }, data: { isActive: false } });
-    return false;
-  }
   return user.isActive;
 }

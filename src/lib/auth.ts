@@ -30,9 +30,8 @@ export const authOptions: NextAuthOptions = {
         });
         if (!user) return null;
 
-        // Chequeo perezoso: si su mes freemium venció sin pago confirmado,
-        // se desactiva justo ahora y se rechaza el login, igual que con
-        // cualquier otra cuenta desactivada.
+        // El acceso gratuito no vence. Solo se rechazan cuentas que un admin
+        // haya desactivado expresamente.
         const isActive = await enforceTrialExpiry(user);
         if (!isActive) return null;
 

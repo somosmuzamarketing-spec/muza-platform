@@ -1,5 +1,5 @@
 // Copy del correo de bienvenida que recibe cada muza nueva apenas se crea su
-// cuenta (mes freemium). Tono cálido y de pertenencia, en línea con la voz de
+// cuenta (acceso gratuito). Tono cálido y de pertenencia, en línea con la voz de
 // la marca ("ya te esperábamos", no "gracias por registrarte").
 //
 // IMPORTANTE: este correo NUNCA lleva una contraseña. Lleva un link de
@@ -43,8 +43,9 @@ export function welcomeEmailHtml({
         pide uno nuevo desde "¿Olvidaste tu clave?" en la pantalla de acceso.
       </p>
       <p style="font-size:15px;line-height:1.6;">
-        Tu primer mes es completamente gratis, así que tómate tu tiempo para conocer los espacios,
-        pasar por el chat de bienvenida y encontrarte con otras muzas.
+        Tu acceso inicial no tiene costo. Puedes completar tu perfil, conocer los espacios abiertos
+        y explorar la comunidad a tu ritmo. Cuando quieras abrir el directorio, las conexiones y las
+        experiencias completas, podrás activar Muza Fundadora.
       </p>
       <p style="font-size:15px;line-height:1.6;">Te esperamos adentro.</p>
       <p style="font-size:15px;line-height:1.6;margin-bottom:0;">Con cariño,<br/>El equipo de Muza</p>
@@ -70,7 +71,7 @@ Crea tu contraseña aquí: ${setPasswordUrl}
 
 Este link es de un solo uso y vence pronto. Si ya no funciona cuando lo abras, pide uno nuevo desde "¿Olvidaste tu clave?" en la pantalla de acceso.
 
-Tu primer mes es completamente gratis, así que tómate tu tiempo para conocer los espacios, pasar por el chat de bienvenida y encontrarte con otras muzas.
+Tu acceso inicial no tiene costo. Puedes completar tu perfil, conocer los espacios abiertos y explorar la comunidad a tu ritmo. Cuando quieras abrir el directorio, las conexiones y las experiencias completas, podrás activar Muza Fundadora.
 
 Te esperamos adentro.
 

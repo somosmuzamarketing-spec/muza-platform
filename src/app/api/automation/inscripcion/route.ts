@@ -20,8 +20,7 @@
 // Railway, sin valores acá):
 // - AUTOMATION_WEBHOOK_SECRET: secreto compartido con Uncanny Automator,
 //   enviado en el header X-Automation-Secret para autenticar el webhook.
-// - SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER, SMTP_PASSWORD: credenciales
-//   del proveedor de correo saliente (ver src/lib/mailer.ts).
+// - MANDRILL_API_KEY: clave de Mailchimp Transactional / Mandrill.
 // - MAIL_FROM_EMAIL, MAIL_FROM_NAME: remitente del correo de bienvenida.
 // - NEXT_PUBLIC_APP_URL: base para el link de "crear mi contraseña".
 import { NextResponse } from "next/server";

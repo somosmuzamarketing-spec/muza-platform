@@ -83,8 +83,9 @@ export default async function Dashboard() {
     ]);
 
   const name = user?.name || sessionName;
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
-  const referralLink = user?.username && baseUrl ? `${baseUrl}/registro?ref=${user.username}` : "";
+  const referralLink = user?.username
+    ? `https://somosmuza.com/conversemos/?ref=${encodeURIComponent(user.username)}`
+    : "";
 
   const trialInfo = { trialEndsAt: user?.trialEndsAt ?? null };
   const locked = !hasActiveAccess(trialInfo);
@@ -376,10 +377,10 @@ export default async function Dashboard() {
       )}
 
       <div className="container">
-        {locked && daysLeft !== null && (
+        {locked && (
           <div className="trial-note">
             <span>
-              Te quedan {daysLeft} día{daysLeft === 1 ? "" : "s"} de tu mes en Muza.
+              Ya eres Muza. Explora los espacios abiertos sin costo y a tu ritmo.
             </span>
             <a href="https://somosmuza.com/fundadora/">Abrir toda la red →</a>
           </div>

@@ -65,8 +65,8 @@ export default async function ContactosPage() {
           <span className="eyebrow">Comunidad</span>
           <h1>Directorio de Muzas</h1>
           <p style={{ color: "var(--muted)", marginTop: "-0.5rem" }}>
-            Esta es la red completa de Muzas. Durante tu mes de acceso puedes conocer quiénes son — conectar y
-            escribirles se activa con tu membresía.
+            Esta es la red completa de Muzas. Con tu acceso gratuito puedes conocer quiénes son; conectar y
+            escribirles se activa con Muza Fundadora.
           </p>
 
           <div className="contact-cards-grid">
