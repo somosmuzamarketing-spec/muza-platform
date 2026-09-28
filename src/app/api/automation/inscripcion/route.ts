@@ -36,10 +36,11 @@ import { welcomeEmailHtml, welcomeEmailSubject, welcomeEmailText } from "@/lib/w
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Mismo TTL que "olvidé mi clave" (ver src/app/olvide-clave/actions.ts): 1
-// hora. Si la nueva muza no llega a usarlo a tiempo, ese mismo flujo de
-// "¿Olvidaste tu clave?" le manda un link nuevo sin intervención de un admin.
-const TOKEN_TTL_MS = 60 * 60 * 1000;
+// 72 horas: a diferencia de "olvidé mi clave" (1 hora), este es el primer
+// correo que recibe la nueva muza y puede no abrirlo en el momento. Si aun
+// así vence, "¿Olvidaste tu clave?" le manda un link nuevo sin intervención
+// de un admin.
+const TOKEN_TTL_MS = 72 * 60 * 60 * 1000;
 
 function appUrl() {
   return process.env.NEXT_PUBLIC_APP_URL || "https://muza-platform-production.up.railway.app";
