@@ -43,7 +43,7 @@ export default function LoginPage() {
         <span className="eyebrow">Acceso a Muzas</span>
         <h2>Bienvenida de vuelta</h2>
         <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
-          Usa el usuario y la clave que te dimos al confirmar tu pago.
+          Usa tu email y la contraseña que elegiste al activar tu cuenta.
         </p>
         <form onSubmit={handleSubmit} style={{ marginTop: "1.6rem" }}>
           <div className="field">
@@ -64,11 +64,11 @@ export default function LoginPage() {
         </form>
         <div className="auth-divider">o</div>
         <p style={{ textAlign: "center", marginBottom: "0.9rem", fontSize: "0.85rem", color: "var(--muted)" }}>
-          ¿Todavía no eres miembro?
+          ¿Todavía no eres Muza?
         </p>
-        <Link href="/registro" className="btn secondary" style={{ width: "100%" }}>
-          Únete aquí
-        </Link>
+        <a href="https://somosmuza.com/conversemos/" className="btn secondary" style={{ width: "100%" }}>
+          Postula a Muza
+        </a>
       </div>
     </div>
   );

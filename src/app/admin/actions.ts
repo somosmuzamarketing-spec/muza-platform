@@ -68,8 +68,8 @@ export async function createMember(_prev: ActionResult, formData: FormData): Pro
     const password = generatePassword();
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Toda candidata que pasa la entrevista recibe su mes de bienvenida
-    // (freemium) automáticamente, a la espera de confirmar el pago.
+    // Toda candidata que pasa la entrevista recibe acceso gratuito sin
+    // vencimiento, con las funciones Fundadora bloqueadas hasta el pago.
     const isFreemium = formData.get("isFreemium") === "on";
 
     const user = await prisma.user.create({

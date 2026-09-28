@@ -29,7 +29,6 @@ import ApproveRequestButton from "@/components/ApproveRequestButton";
 import EventBannerUpload from "@/components/EventBannerUpload";
 import ResetPasswordButton from "@/components/ResetPasswordButton";
 import AnnouncementForm from "@/components/AnnouncementForm";
-import { trialDaysLeft } from "@/lib/trial";
 import { processFounderSequenceSweep } from "@/lib/founderSequence";
 
 function nominationTypeLabel(type: string) {
@@ -189,8 +188,8 @@ export default async function AdminPage() {
         <div className="card">
           <h2>Crear miembro manualmente</h2>
           <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
-            Úsalo para dar de alta a una candidata que pasó la entrevista. Por defecto arranca con su mes de
-            bienvenida (freemium); destildar la casilla solo si ya pagó desde el inicio.
+            Úsalo para dar de alta a una candidata que pasó la entrevista. Por defecto recibe acceso gratuito
+            sin vencimiento; destilda la casilla solo si ya pagó Muza Fundadora desde el inicio.
           </p>
           <CreateMemberForm />
         </div>
@@ -198,18 +197,17 @@ export default async function AdminPage() {
         <div className="card">
           <h2>Registrar pago (Binance / PayPal)</h2>
           <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
-            Para una miembra que ya tiene cuenta (su mes de bienvenida). Queda en &quot;Pagos pendientes de
-            aprobar&quot; arriba; al aprobarla se activa su membresía y se cierra su periodo freemium.
+            Para una Muza que ya tiene acceso gratuito. Queda en &quot;Pagos pendientes de aprobar&quot; arriba;
+            al aprobarla se activa Muza Fundadora.
           </p>
           <form action={recordManualPayment}>
             <select name="userId" defaultValue="" required>
               <option value="" disabled>Elige una miembra</option>
               {members.map((m) => {
-                const daysLeft = trialDaysLeft(m);
                 return (
                   <option key={m.id} value={m.id}>
                     {m.name || m.username}
-                    {daysLeft !== null ? ` (freemium, ${daysLeft}d restantes)` : " (sin freemium activo)"}
+                    {m.trialEndsAt ? " (acceso gratuito)" : " (Muza Fundadora)"}
                   </option>
                 );
               })}
@@ -491,7 +489,7 @@ export default async function AdminPage() {
                   </th>
                 ))}
                 <th>Plan</th>
-                <th>Freemium</th>
+                <th>Acceso</th>
                 <th>Activo</th>
                 <th>Último ingreso</th>
                 <th>Clave</th>
@@ -499,7 +497,6 @@ export default async function AdminPage() {
             </thead>
             <tbody>
               {members.map((m) => {
-                const daysLeft = trialDaysLeft(m);
                 return (
                 <tr key={m.id}>
                   <td>
@@ -528,10 +525,10 @@ export default async function AdminPage() {
                     </form>
                   </td>
                   <td style={{ textAlign: "center" }}>
-                    {daysLeft !== null ? (
-                      <span className="badge gold">{daysLeft}d</span>
+                    {m.trialEndsAt ? (
+                      <span className="badge">Gratuito</span>
                     ) : (
-                      <span style={{ color: "var(--muted)", fontSize: "0.8rem" }}>—</span>
+                      <span className="badge gold">Fundadora</span>
                     )}
                   </td>
                   <td style={{ textAlign: "center" }}>

@@ -7,7 +7,7 @@ import { LOCK_ICON } from "./icons";
 const FUNDADORA_URL = "https://somosmuza.com/fundadora/";
 
 const DEFAULT_BODY =
-  "Conecta directamente con el resto de la red de Muzas. Tu mes de acceso ya te dejó ver quién está aquí — conectar y escribirle es parte de la membresía completa.";
+  "Conecta directamente con el resto de la red de Muzas. Tu acceso gratuito te permite explorar la comunidad; conectar y escribirle a otras Muzas es parte de la membresía completa.";
 
 function UpsellDialog({
   bodyText,
@@ -28,12 +28,10 @@ function UpsellDialog({
         <span className="eyebrow">Membresía Muza</span>
         <h2>Esto se desbloquea con tu membresía</h2>
         <p className="upsell-body">{bodyText}</p>
-        {daysLeft !== null && (
-          <div className="upsell-trial-strip">
-            <span className="dot" />
-            Te quedan {daysLeft} día{daysLeft === 1 ? "" : "s"} de tu mes gratis
-          </div>
-        )}
+        <div className="upsell-trial-strip">
+          <span className="dot" />
+          Seguirás teniendo acceso gratuito a los espacios abiertos
+        </div>
         <a href={FUNDADORA_URL} className="upsell-cta">
           Abrir toda la red
         </a>

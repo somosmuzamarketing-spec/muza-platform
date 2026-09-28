@@ -95,7 +95,7 @@ export default function CreateMemberForm() {
 
         <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.9rem" }}>
           <input name="isFreemium" type="checkbox" defaultChecked style={{ width: "auto", marginBottom: 0 }} />
-          Mes de bienvenida (freemium) — acceso completo por 30 días, sin pago confirmado
+          Acceso gratuito — funciones abiertas, sin fecha de vencimiento
         </label>
 
         <SubmitButton />
