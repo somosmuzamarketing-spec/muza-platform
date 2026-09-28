@@ -25,8 +25,11 @@ export const authOptions: NextAuthOptions = {
         // falle el login de una cuenta creada con ese mismo email en minúscula.
         const username = credentials.username.trim().toLowerCase();
 
-        const user = await prisma.user.findUnique({
-          where: { username },
+        // La pantalla de acceso pide el email; las cuentas creadas a mano
+        // desde /admin pueden tener un username distinto, así que se acepta
+        // cualquiera de los dos.
+        const user = await prisma.user.findFirst({
+          where: { OR: [{ username }, { email: username }] },
         });
         if (!user) return null;
 
